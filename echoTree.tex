@@ -52,8 +52,8 @@
  \begin{list}{$\bullet$}
  {
   \setlength{\itemsep}{0pt}
-  \setlength{\parsep}{3pt}
-  \setlength{\topsep}{3pt}
+  \setlength{\parsep}{0pt}   %3pt
+  \setlength{\topsep}{0pt}   %3pt
   \setlength{\partopsep}{0pt}
   \setlength{\leftmargin}{1.5em}
   \setlength{\labelwidth}{1em}
@@ -95,6 +95,7 @@
 \definecolor{gray}{RGB}{163,163,163}
 \newenvironment{graytext}{\color{gray}}{\ignorespacesafterend}
 
+%\setlength{\belowcaptionskip}{-3pt}
 
 %************* End Andreas Additions
 
@@ -200,27 +201,7 @@ materials.
 
 \tolerance=400
 
-% Macros for the Python and Puppet interface names.
-% Using these in case we want to change these terms:
-\newcommand{\py}{{\em coding interface}}
-\newcommand{\puppet}{{\em Puppet interface}}
-\newcommand{\semi}{{\em semi-autonomous interface}}
-\newcommand{\tapper}{{\em Tapper}}
-
 %\newcommand{\degree}{$^\circ$}
-
-
-\section{Introduction}
-
-%*****
-% Note: use macros \py, \semi\, and \puppet as the names for the three
-% interfaces: Python, original IK based puppet design, and ultimate
-% design used in the museum.
-%
-%o hack the future: number of hours
-%o number of hours for exhibit open
-%o three versions: Programming (\py), old (\semi), and Puppet (\puppet)
-%*****
 
 \section{Introduction}
 We collaborate with a motion and speech impaired individual, Henry,
