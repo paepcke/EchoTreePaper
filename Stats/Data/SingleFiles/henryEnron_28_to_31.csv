@@ -1,0 +1,4 @@
+EmailID,SentenceID,SentenceLen,Failures,OutofSeq,NetFailure,NetSuccess,Depth_1,Depth_2
+10474,0,6,6,0,6,0.00,0,0
+10474,1,8,8,0,8,0.00,0,0
+10474,2,5,3,0,3,40.00,1,1
