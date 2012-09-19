@@ -327,7 +327,15 @@ presence of speed limitations.
 \subsection{Architecture}
 
 Figure~\ref{fig:architecture} shows how the EchoTree system is
-constructed. Central, or distributed EchoTree servers each manage some
+constructed. 
+\begin{figure}
+   \centering
+   \includegraphics[width=\columnwidth]{Figs/echoTreeArch.pdf}
+   \caption{EchoTree architecture. Channels are implemented as
+     WebSocket ports. Browsers tune in to different EchoTree channels.}
+   \label{fig:arch}
+\end{figure}
+Central, or distributed EchoTree servers each manage some
 number of distinct EchoTree channels. All facilities described above
 operated on one channel. All shared EchoTree views are refreshed, and
 request re-rooting on one channel. 
@@ -419,12 +427,28 @@ experiment, as shown in Table~\ref{tab:conditions}.
 
 Figure~\ref{fig:overview} 
 %-------------------
-%% \begin{figure}
-%%    \centering
-%%    \includegraphics[width=\columnwidth]{Figs/exhibitOverview_crop.jpg}
-%%    \caption{San Jose Tech museum installation overview.}
-%%    \label{fig:overview}
-%% \end{figure}
+\begin{figure}
+   \centering
+   \includegraphics[width=\columnwidth]{Figs/echoTreePulldownSnapshotSmall.png}
+   \caption{Screenshot of an EchoTree browser.}
+   \label{fig:echoTree}
+\end{figure}
+
+\begin{figure}
+   \centering
+   \includegraphics[width=\columnwidth]{Figs/echoTreeRootTodaySmall.png}
+   \caption{EchoTree re-rooted in `today'. Blue words were user
+     selected, adding them to the sentence box.}
+   \label{fig:todayTree}
+\end{figure}
+
+\begin{figure}
+   \centering
+   \includegraphics[width=\columnwidth]{Figs/echoTreePulldownSnapshotSmall.png}
+   \caption{Shortcut words are available as fillers for the sentence
+     box. These stopwords will not occur in EchoTrees.}
+   \label{fig:shortcuts}
+\end{figure}
 
 % Balancing columns in a ref list is a bit of a pain because you
 % either use a hack like flushend or balance, or manually insert
