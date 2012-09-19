@@ -1,0 +1,2 @@
+EmailID,SentenceID,SentenceLen,Failures,OutofSeq,NetFailure,NetSuccess,Depth_1,Depth_2
+10473,0,19,18,0,18,5.26,0,1
