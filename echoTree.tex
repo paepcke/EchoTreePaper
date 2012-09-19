@@ -122,7 +122,7 @@ breaklinks=true,
 % End of preamble. Here it comes the document.
 \begin{document}
 
-\title{{\em EchoTree}: Engaged Conversation when Capabilities are Limited}
+\title{EchoTree: Engaged Conversation when Capabilities are Limited}
 
 % Note that submissions are blind, so author information should be omitted
 
@@ -321,7 +321,7 @@ these words will enter them in the sentence box. Again, in the current
 implementation this addition appears in all views of the EchoTree.
 \begin{figure}
    \centering
-   \includegraphics[width=0.5\columnwidth]{Figs/echoTreePulldownSnapshotSmall.png}
+   \includegraphics[width=0.4\columnwidth]{Figs/echoTreePulldownSnapshotSmall.png}
    \caption{Shortcut words are available as fillers for the sentence
      box. These stopwords will not occur in EchoTrees.}
    \label{fig:shortcuts}
@@ -401,13 +401,16 @@ induced EchoTrees.
 
 \section{Effectiveness Experiment}
 EchoTrees could be effective along several dimensions. Each dimension
-implies a different evaluation method:
-\squishlist
-\item[1.] Conversation acceleration through word prediction.
-\item[2.] Conversation acceleration by conveying intent.
-\item[3.] Encouragement through bi- or multilateral engagement.
-\item[4.] Fun
-\squishend
+implies a different evaluation method. 1.Conversation acceleration
+through word prediction, 2.Conversation acceleration by conveying
+intent, 3. Encouragement through bi-- or multilateral engagement, and
+4. Fun.
+%% \squishlist
+%% \item[1.] Conversation acceleration through word prediction.
+%% \item[2.] Conversation acceleration by conveying intent.
+%% \item[3.] Encouragement through bi- or multilateral engagement.
+%% \item[4.] Fun
+%% \squishend
 We measured the first item in an experiment, which we will describe in
 this section. This dimension works by accurately predicting the next
 word the current utterance originator is planning to type.
@@ -431,29 +434,29 @@ important start.
 \subsection{Prediction Measurement Setup}
 Like all word prediction, EchoTrees depend for their predictive power
 on the match between the word source and the underlying frequency
-data. We tested and compared two such pairings in an experiment, as
-shown in Table~\ref{tab:conditions}.
-\begin{table}{\scriptsize
-    \begin{tabular}{|r|c|c|}
-         % \T and \B would not work if it is placed here (needs to go inside cell)
-        \hline
-        ~                & {\bf Enron Collection} \T \B & {\graytext\bf Google Bigrams} \\ \hline
-        {\bf Non-Enron} \T & ~    & ~  {\graytext\em Planned}     \\ 
-        {\bf Enron EmpX} \B & ~   & ~  {\graytext\em Planned}     \\
-        \hline
-    \end{tabular}
-    }
-    \caption{Experiment matching utterance originators with
-      word prediction source(s). Gray entry shows future work, and
-      exemplifies how suitability of additional collections will be evaluated.}
-    \label{tab:conditions}
-\end{table}
-Our findings are preliminary, and the grayed-out portion of the Table
-clarifies where future experiments need to continue. For our
-experiment we used the 2.6GB Enron collection of emails produced
-within the Enron corporation. It comprises 48,900 emails. After
-stopword removal our bigram database from these emails contains
-3,881,632 entries.
+data. We tested and compared two such pairings in an experiment
+%shown in Table~\ref{tab:conditions}.
+%###################################
+%% \begin{table}{\scriptsize
+%%     \begin{tabular}{|r|c|c|}
+%%          % \T and \B would not work if it is placed here (needs to go inside cell)
+%%         \hline
+%%         ~                & {\bf Enron Collection} \T \B & {\graytext\bf Google Bigrams} \\ \hline
+%%         {\bf Non-Enron} \T & ~    & ~  {\graytext\em Planned}     \\ 
+%%         {\bf Enron EmpX} \B & ~   & ~  {\graytext\em Planned}     \\
+%%         \hline
+%%     \end{tabular}
+%%     }
+%%     \caption{Experiment matching utterance originators with
+%%       word prediction source(s). Gray entry shows future work, and
+%%       exemplifies how suitability of additional collections will be evaluated.}
+%%     \label{tab:conditions}
+%% \end{table}
+%###################################
+Our findings are preliminary. For our experiment we used the 2.6GB
+Enron collection of emails produced within the Enron corporation. It
+comprises 48,900 emails. After stopword removal our bigram database
+from these emails contains 3,881,632 entries.
 
 In order to measure the sensitivity of EchoTrees to the underlying
 bigram source we used 40 emails that Henry sent to a mailing list. The
@@ -475,7 +478,6 @@ does not contain the email's immediately following word, but does
 contain a word later in the same sentence. The measure {\em
   netSuccess} for one sentence is the sum of {\em success} and {\em
   outOfSeq} as a percentage of the respective sentence's length.
-
 \subsection{Results}
 Figure~\ref{fig:netSuccess} shows the average {\em netSuccess} for
 both the Enron originating emails, and the emails not related to Enron
@@ -525,6 +527,34 @@ architecture (Figure~\ref{fig:arch}) anticipates multiple bigram
 sources that can be switched dynamically.
 
 \section{Related Work}
+EchoTree draws on prior work in reducing text input demands for
+impaired users through the use of language modeling and prediction
+techniques. Existing systems such as Humsher~\cite{Polacek2011}, for
+example, have adapted letter-based text entry systems designed for
+able-bodied users to significantly accelerate text entry for users
+with severe motor impairments.
+
+Trnka, et al. motivate the use of word-based prediction, finding that
+the increased typing rates offered by {\em n-gram}-based word
+prediction can offset the additional cognitive load they may
+introduce~\cite{Trnka2009}. Roark, et al. identified how human
+guessing and n-gram prediction models can complement each other in
+important and useful ways~\cite{Roark2011}. By incorporating the
+conversation partner and word-prediction model into a single
+conversational loop, EchoTree builds on and extends these insights
+from prior work.
+
+EchoTree's design draws heavily on the visual 'keyword-in-context'
+technique embodied in the Word Tree by Wattenberg and
+Viegas~\cite{wattenberg2008}. EchoTree adapts this technique from its
+original purpose of analyzing text corpora to the new problem of
+collaborative text generation. The use of visual metaphors, direct
+interaction, and output-as-input techniques allow for tight coupling
+between the conversation participants and the information
+display~\cite{Ahlberg1994}. The sentence box and confirmation loop
+further afford the process of {\em grounding}, enabling tighter
+coupling between the conversation partners themselves as they
+negotiate the evolving sentence together.
 
 \section{Future Work and Conclusion}
 EchoTree leaves room for many user experience improvements,
@@ -542,10 +572,10 @@ Our strongest hope for EchoTree is that it will help blur the
 distinction between conversation partners of varying physical
 abilities. 
 
-\section{Acknowledgments}
-Thank you to Henry (anonymized for submission) for patient testing,
-and encouragment of crazy ideas. And: we are grateful to (anonymous)
-for his JavaScript prowess, and willingness to apply it.
+%% \section{Acknowledgments}
+%% Thank you to Henry (anonymized for submission) for patient testing,
+%% and encouragment of crazy ideas. And: we are grateful to (anonymous)
+%% for his JavaScript prowess, and willingness to apply it.
 %-------------------
 
 
