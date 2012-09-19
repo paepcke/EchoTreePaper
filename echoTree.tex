@@ -230,6 +230,12 @@ keeping the listener(s) actively involved in the conversation.
 In an attempt to ameliorate the situation further we developed
 EchoTree. EchoTree is a distributed, collaborative word
 tree. Figure~\ref{fig:echoTree} shows an example.
+\begin{figure}
+   \centering
+   \includegraphics[width=\columnwidth]{Figs/echoTreeScreenshotSmall.png}
+   \caption{Screenshot of an EchoTree browser.}
+   \label{fig:echoTree}
+\end{figure}
 
 \section{User Experience}
 
@@ -260,7 +266,13 @@ root of a new tree. All follow words are recomputed, and a new tree is
 displayed on all browsers. Figure~\ref{fig:todayTree} shows the result
 of clicking on the word {\em today} in Figure~\ref{fig:echoTree}'s
 tree. 
-
+\begin{figure}
+   \centering
+   \includegraphics[width=\columnwidth]{Figs/echoTreeRootTodaySmall.png}
+   \caption{EchoTree re-rooted in `today'. Blue words were user
+     selected, adding them to the sentence box.}
+   \label{fig:todayTree}
+\end{figure}
 Alternatively, one may type a new word into the text box at the top,
 and click on the button {\em Get New Tree}. This action again creates
 a new tree, rooted at the new word, and displayed everywhere.
@@ -301,7 +313,13 @@ fill words. The pull-down menu below the {\em New word} field fills
 that need (Figure~\ref{fig:shortcuts}). Selecting any of these words
 will enter them in the sentence box. Again, in the current
 implementation this addition appears in all views of the EchoTree. 
-
+\begin{figure}
+   \centering
+   \includegraphics[width=\columnwidth]{Figs/echoTreePulldownSnapshotSmall.png}
+   \caption{Shortcut words are available as fillers for the sentence
+     box. These stopwords will not occur in EchoTrees.}
+   \label{fig:shortcuts}
+\end{figure}
 Note that the use of EchoTrees for collaborative conversation is not
 limited to face-to-face situations, like parties. Communication
 with Henry via the telephone are also an option. The remote
@@ -326,7 +344,7 @@ presence of speed limitations.
 
 \subsection{Architecture}
 
-Figure~\ref{fig:architecture} shows how the EchoTree system is
+Figure~\ref{fig:arch} shows how the EchoTree system is
 constructed. 
 \begin{figure}
    \centering
@@ -341,7 +359,7 @@ operated on one channel. All shared EchoTree views are refreshed, and
 request re-rooting on one channel. 
 
 Multiple, unrelated EchoTree sequences may be served by a single
-server, using different ports. In Figure~\ref{fig:architecture}
+server, using different ports. In Figure~\ref{fig:arch}
 Browers~1 is separated from Browsers two and three, which share all
 EchoTree transmissions.
 
@@ -349,7 +367,7 @@ Browsers communicate with EchoTree servers via WebSocket connections,
 which are bi-directional. This bidirectionality enables the re-rooting
 requests from browsers back to the server.
 
-Figure~\ref{fig:architecture} also shows an HTTP port family. These
+Figure~\ref{fig:arch} also shows an HTTP port family. These
 ports can push new words to the echo server, triggering the multicast
 of a new EchoTree to all browsers on the respective channel. These
 HTTP connections are simpler than the more versatile WebSocket
@@ -361,7 +379,7 @@ application. This method allows Henry to focus on typing in his usual
 environment, and not being forced to interact with a browser's {\em
   New Word} entry to push a new word (and consequently new EchoTree).
 
-Figure~\ref{fig:architecture} shows a series of databases with word
+Figure~\ref{fig:arch} shows a series of databases with word
 pair frequencies that are the basis for the generation of the
 trees. Each database holds lists triples: a word, a follower word, and
 a frequency count. These {\em bigram} counts may originate from any
@@ -425,30 +443,8 @@ experiment, as shown in Table~\ref{tab:conditions}.
 \section{Future Work}
 \section{Conclusion}
 
-Figure~\ref{fig:overview} 
 %-------------------
-\begin{figure}
-   \centering
-   \includegraphics[width=\columnwidth]{Figs/echoTreePulldownSnapshotSmall.png}
-   \caption{Screenshot of an EchoTree browser.}
-   \label{fig:echoTree}
-\end{figure}
 
-\begin{figure}
-   \centering
-   \includegraphics[width=\columnwidth]{Figs/echoTreeRootTodaySmall.png}
-   \caption{EchoTree re-rooted in `today'. Blue words were user
-     selected, adding them to the sentence box.}
-   \label{fig:todayTree}
-\end{figure}
-
-\begin{figure}
-   \centering
-   \includegraphics[width=\columnwidth]{Figs/echoTreePulldownSnapshotSmall.png}
-   \caption{Shortcut words are available as fillers for the sentence
-     box. These stopwords will not occur in EchoTrees.}
-   \label{fig:shortcuts}
-\end{figure}
 
 % Balancing columns in a ref list is a bit of a pain because you
 % either use a hack like flushend or balance, or manually insert
