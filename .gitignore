@@ -4,3 +4,5 @@
 *\.log
 *\.out
 .#echoTree.tex
+echoTree.bbl
+echoTree.blg
