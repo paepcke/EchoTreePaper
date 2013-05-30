@@ -1,0 +1,7 @@
+- Grouping variable DBSource:
+     0: Henry blog bigrams
+     1: Henry blog trigrams
+     2: Fisher bigrams  
+     3: Fisher trigrams  
+     4: DmozRec bigrams
+     5: DmozRec trigrams

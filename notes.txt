@@ -1,0 +1,1334 @@
+To do
+Plan
+Collections
+Running measurements
+SQLite Queries
+Timing
+Dataset Notes
+Literature
+Scratch
+
+To do
+-----
+  - Echo_tree_server: timeout error message:
+	     File "/home/paepcke/fuerte/stacks/echo_tree_experiment/src/echo_tree_experiment/tornado/iostream.py", line 354, in _handle_read
+	       if self._read_to_buffer() == 0:
+	     File "/home/paepcke/fuerte/stacks/echo_tree_experiment/src/echo_tree_experiment/tornado/iostream.py", line 422, in _read_to_buffer
+	       chunk = self._read_from_socket()
+	     File "/home/paepcke/fuerte/stacks/echo_tree_experiment/src/echo_tree_experiment/tornado/iostream.py", line 403, in _read_from_socket
+	       chunk = self.socket.recv(self.read_chunk_size)
+	   error: [Errno 110] Connection timed out
+
+  - Browsers with same settings should be connected
+  - Firefox: Gets wrong words! (lots starting with z)
+  - Firefox: need to reload several times to get trees started
+  - Firefox: Clicking on node causes break: if (this.event.which == 1) {// Left click
+    Also: hard-coded Henry there.
+  - Learn to run NgramPlainText.java on command line.
+  - Re-run ngram creation for DmozRecreation, and re-test the trees
+
+  - Long msgs don't work in alert, like Out-of-sync msg.
+  - Remove from ngrams:
+      Still getting:
+         o html, ico, js, com,
+      href
+      com
+      br
+      quot
+      nbsp
+      --- new ---- (Might be all gone with the new stripper
+      asp
+      vspace
+      hspace
+      img
+      css
+      src
+      php
+      --- end new ----
+      br followed by HTML, like amp, gt, col, quot, png, js, css
+  - Add the last trigram element as one of the level 3 EchoTree choices
+  - Porter stemming?
+  - Maybe not delete the normal stop words? At least for ngram root,
+    which show up as an empty tree:
+      o are
+      o the
+      o of
+    Or: allow stopwords, but fold their follow-ons into them in parens:
+          root:        This (is,will,..) 
+          follower:    non-stopword follower
+       
+  - Ensure that no par was ever given to a partner-roled player twice
+  - Backbutton is kiss of death. Must fix. Maybe connected with this
+    error in experiment server log:
+	  2013-04-05 19:02:05.691877: Message from participant: 'addWord:a'.
+	  ERROR:root:Uncaught exception in /echo_tree_experiment
+	  Traceback (most recent call last):
+	    File "/home/paepcke/fuerte/stacks/echo_tree_experiment/src/echo_tree_experiment/tornado/websocket.py", line 258, in wrapper
+	      return callback(*args, **kwargs)
+	    File "/home/paepcke/fuerte/stacks/echo_tree_experiment/src/echo_tree_experiment/echo_tree_experiment_server.py", line 407, in on_message
+	      self.myDyad.getThatHandler().write_message("addWord:" + word);
+	    File "/home/paepcke/fuerte/stacks/echo_tree_experiment/src/echo_tree_experiment/tornado/websocket.py", line 144, in write_message
+	      self.ws_connection.write_message(message, binary=binary)
+	  AttributeError: 'NoneType' object has no attribute 'write_message'
+
+  - In partner ticker: upper case gets lower-cased
+  - In ticker: 
+      o Holding backspace key will not keep up in partner
+  - Add pic of UIs to index.html
+  - Write allowParticipant.py, which removes participant from all participant's
+    former playmates list
+  - Catching participants with already two games together faulty:
+      First login sees 1 game, second login sees 2 games in participant
+      playmates.
+    
+
+
+
+  - Get googleNgrams.db into shape
+
+  - Timeout error, *maybe* only when reads are piled up:
+      2013-04-03 13:21:31.807425: New root word from connected browser: 'you@google': 'receive'
+      2013-04-03 13:23:33.096208: New root word from connected browser: 'you@google': 'receive'
+      WARNING:root:Read error on 11: [Errno 110] Connection timed out
+      2013-04-03 13:33:12.984312: Browser at mono.stanford.edu:5005 (171.64.75.92) now disconnected.
+      WARNING:root:error on read: error(110, 'Connection timed out')
+      Traceback (most recent call last):
+        File "/home/paepcke/fuerte/stacks/echo_tree_experiment/src/echo_tree_experiment/tornado/iostream.py", line 354, in _handle_read
+          if self._read_to_buffer() == 0:
+        File "/home/paepcke/fuerte/stacks/echo_tree_experiment/src/echo_tree_experiment/tornado/iostream.py", line 422, in _read_to_buffer
+          chunk = self._read_from_socket()
+        File "/home/paepcke/fuerte/stacks/echo_tree_experiment/src/echo_tree_experiment/tornado/iostream.py", line 403, in _read_from_socket
+          chunk = self.socket.recv(self.read_chunk_size)
+      error: [Errno 110] Connection timed out
+
+
+
+Plan
+----
+  - Bigrams
+     o health
+     o shopping
+     o entertainment
+     o google
+  - Trigrams
+  - Human experiment:
+       
+
+Collections
+-----------
+
+- Google ngrams:
+     
+     o In: /afs/cs/group/infolab/datasets/snap-private/web1T5gram/
+           /afs/cs/group/infolab/datasets/snap-private/web1T5gram/data/2gms
+     o Date: Jan 2006
+     o Schema: WORD_1 <space> WORD_2 <space> ... WORD_N <tab> COUNT
+     o Number of tokens:    1,024,908,267,229
+       Number of sentences:    95,119,665,584
+       Number of bigrams:         314,843,401
+       Number of trigrams:        977,069,902
+     o Filtered by: 
+         * Only ngram counts > 40
+	 * Not too long
+	 * Only ASCII chars
+     o Special tokens:
+         * <S>  : start of sentence
+	 * </S> : end of sentence
+	 * <UNK>: unknown: ngrams < count 40; bad ngrams.
+
+     o Processing the .gz files:
+         cd /afs/cs/group/infolab/datasets/snap-private/web1T5gram/data/2gms
+	 mkfifo --mode=0666 /tmp/andreasPipe
+	 gzip -d --to-stdout *.gz  | sed 's/[ \t]/,/g' > /tmp/andreasPipe
+
+       In separate shell:
+         cd ~/Datasets/GoogleNgrams
+	 sqlite3 googleNgrams.db
+
+       In SQLite:
+         .separator ","
+	 CREATE TABLE Ngrams(word varchar(25), follower varchar(25), followingCount smallint);
+	 BEGIN TRANSACTION;
+         .import /tmp/andreasPipe Ngrams
+         COMMIT TRANSACTION; # might have closed the xaction automatically
+         CREATE INDEX wordFollCountIndx ON Ngrams (word, followingCount);
+        .exit
+	 
+
+
+      # Then load the uncompressed data into a MySQL table[1] like so:
+
+      LOAD DATA INFILE '/tmp/namedPipe' INTO TABLE tableName;
+
+
+- DmozHealth:
+     o Number of recs in unfiltered crawl: 9,501,919. Size: 61GB
+        /usr/bin/time -v warcRecordCount Datasets/DmozHealth
+        (Took 7+hrs on iln29, but 11.5 minutes using Haddoop.
+
+     o Removing pages that came from the dmoz site itself:
+         # The backslash in '(?\!.*dmoz...' in the following just protects the '!' 
+         # from bash interpretation. It is not part of the regex:
+         /usr/bin/time -v warcFilter Datasets/DmozHealth.gz "WARC-Target-URI" "(?s)(?\!.*dmoz).*" 
+
+       Result:
+          Read 9501919 records (64567397814 bytes) from: "hdfs://iln29.stanford.edu:9000/user/paepcke/Datasets/DmozHealth.gz"
+          Stored 9332668 records (30514758082 bytes) in: "/user/paepcke/Datasets/DmozHealth.gz_filtered.gz"
+        Elapsed (wall clock) time (h:mm:ss or m:ss): 11:32.83
+
+     o Count the records to double-check:
+         warcRecordCount Datasets/DmozHealth.gz_filtered.gz
+         9,332,668 WARC records total.
+
+     o Strip HTML (12 min):
+	  Read   9,332,668 rec     (30,514,784,514) bytes)from: 
+                 "hdfs://iln29.stanford.edu:9000/user/paepcke/Datasets/DmozHealth.gz_filtered.gz"
+	  Stored 9,332,668 records (18,382,140,566 bytes) in: 
+	         "/user/paepcke/Datasets/DmozHealth.gz_filtered.gz_strippedHTML"
+         /usr/bin/time -v warcStripHTML Datasets/DmozHealth.gz_filtered.gz
+
+     o Set-aside 10% of Datasets/DmozFilteredHTMLStripped.gz into _sample.gz and _main.gz (18 min)
+        /usr/bin/time -v warcStripHTML Datasets/DmozHealth.gz_filtered.gz
+	  Stored 933,727   records (1,251,564,869 bytes) in: "/user/paepcke/Datasets/DmozHealth.gz_filtered.gz_strippedHTML.gz_sample.gz"
+          Stored 8,398,924 records (11,584,611,423 bytes) in: "/user/paepcke/Datasets/DmozHealth.gz_filtered.gz_strippedHTML.gz_main.gz"
+
+     o Ngrams over main collection (24 min)
+        /usr/bin/time -v warcNgrams Datasets/DmozHealth.gz_filtered.gz_strippedHTML.gz_main.gz
+	  Read    8,398,924 records (11584629777 bytes) from: "hdfs://iln29.stanford.edu:9000/user/paepcke/Datasets/DmozHealth.gz_filtered.gz_strippedHTML.gz_main.gz"
+	  Stored 35,676,142 records (142087177 bytes) in: "/user/paepcke/Datasets/DmozHealth.gz_filtered.gz_strippedHTML.gz_main.gz_ngrams.csv.gz"
+
+     o Cull Ngrams: remove stopwords, remove words less than 2 chars long (4 min):
+        /usr/bin/time -v cullNgrams Datasets/DmozHealth.gz_filtered.gz_strippedHTML.gz_main.gz_ngrams.csv.gz
+
+     o FOR REST, SEE DmozRecreation!
+
+- DmozRecreation (Bigrams) OLD!!!!!:
+
+     o Number of recs in unfiltered crawl: 10,966,815 (8 min)
+        /usr/bin/time -v warcRecordCount Datasets/DmozRecreation
+
+     o Removing pages that came from the dmoz site itself (9 min):
+         # The backslash in '(?\!.*dmoz...' in the following just protects the '!' 
+         # from bash interpretation. It is not part of the regex:
+         /usr/bin/time -v warcFilter Datasets/DmozRecreation.gz "WARC-Target-URI" "(?s)(?\!.*dmoz).*" 
+	   Read   10,966,815 records (80,723,600,956 bytes) from: "hdfs://iln29.stanford.edu:9000/user/paepcke/Datasets/DmozRecreation.gz"
+	   Stored 10,660,409 records (41,982,509,108 bytes) in: "/user/paepcke/Datasets/DmozRecreation.gz_filtered.gz"
+
+     o Strip HTML (16 min):
+	   Read   10,660,409 records (41,982,541,332 bytes) from: "hdfs://iln29.stanford.edu:9000/user/paepcke/Datasets/DmozRecreation.gz_filtered.gz"
+	   Stored 10,660,409 records (26,104,356,489 bytes) in: "/user/paepcke/Datasets/DmozRecreation.gz_filtered.gz_strippedHTML.gz"
+         /usr/bin/time -v warcStripHTML Datasets/DmozRecreation.gz_filtered.gz
+
+     o Set-aside 10% of Datasets/DmozRecreation.gz_filtered.gz_strippedHTML.gz (23 min):
+        /usr/bin/time -v warcSetAside Datasets/DmozRecreation.gz_filtered.gz_strippedHTML.gz 10.0
+	   Read 10,660,409 records (26104389226 bytes) from: "hdfs://iln29.stanford.edu:9000/user/paepcke/Datasets/DmozRecreation.gz_filtered.gz_strippedHTML.gz"
+	   Stored 1,065,436 records (1673323394 bytes) in: "/user/paepcke/Datasets/DmozRecreation.gz_filtered.gz_strippedHTML.gz_sample.gz"
+	   Stored 9,278,086 records (14846872859 bytes) in: "/user/paepcke/Datasets/DmozRecreation.gz_filtered.gz_strippedHTML.gz_main.gz"
+
+     o Ngrams over main collection
+        /usr/bin/time -v warcNgrams Datasets/DmozRecreation.gz_filtered.gz_strippedHTML.gz_main.gz
+	  Read   9,278,086 records (14846896232 bytes) from: "hdfs://iln29.stanford.edu:9000/user/paepcke/Datasets/DmozRecreation.gz_filtered.gz_strippedHTML.gz_main.gz"
+	  Stored 37,083,785 records (140567994 bytes) in:
+        "/user/paepcke/Datasets/DmozRecreation.gz_filtered.gz_strippedHTML.gz_main.gz_ngrams.csv.gz"
+
+     o MAYBE SKIP: Cull Ngrams: remove stopwords, remove words less than 2 chars long (4min):
+         /usr/bin/time -v cullNgrams Datasets/DmozRecreation.gz_filtered.gz_strippedHTML.gz_main.gz_ngrams.csv.gz
+
+     o Create frequency,frequency-of-frequency file for feeding into GoodTuring smoothing:
+        /usr/bin/time -v ngramFrequencies Datasets/DmozRecreation.gz_filtered.gz_strippedHTML.gz_main.gz_ngrams.csv.gz_culled.gz
+        Generates:
+          ngramFrequencies Datasets/DmozRecreation.gz_filtered.gz_strippedHTML.gz_main.gz_ngrams.csv.gz_culled.gz_freqs.gz
+
+     o Create CSV file of word,follower,probability:
+
+       On iln29:
+
+       .cptl Datasets/DmozRecreation.gz_filtered.gz_strippedHTML.gz_main.gz_ngrams.csv.gz_culled.gz_freqs.gz ~/Datasets/DmozRecreation/
+       # Get a single-file copy
+       .pull Datasets/DmozRecreation.gz_filtered.gz_strippedHTML.gz_main.gz_ngrams.csv.gz_culled.gz_freqs.gz DmozRecreation.gz_filtered.gz_strippedHTML.gz_main.gz_ngrams.csv.gz_culled.gz_freqs.gz/dmozRecreationFreqs.csv.gz
+       # Take to mono's echo_tree_experiment Resources dir:
+       scp DmozRecreation.gz_filtered.gz_strippedHTML.gz_main.gz_ngrams.csv.gz_culled.gz_freqs.gz/dmozRecreationFreqs.csv.gz mono:fuerte/stacks/echo_tree_experiment/src/echo_tree_experiment/Resources/DmozRecreation
+
+       On mono/duo, etc.:
+
+       cd fuerte/stacks/echo_tree_experiment/src/echo_tree_experiment/Resources/DmozRecreation
+       # Save a gz'ed copy:
+       cp dmozRecreationFreqs.csv.gz dmozRecreationFreqs.csv.ORIG.gz
+       gunzip dmozRecreationFreqs.csv.gz
+
+       # IF dmozRecreationFreqs.csv does not have "1,xxx" as first line:
+       # Add "1,1" as the first line to ensure shifting of probability mass to unseens:
+       echo "1,1" > dmozRecreationPrepGoodTuring.csv
+
+       # Merge in the freq/freq-of-freqs file:
+       cat dmozRecreationFreqs.csv >> dmozRecreationPrepGoodTuring.csv
+
+       # Create Good-Turing estimate:
+       cat dmozRecreationPrepGoodTuring.csv | ../../../../bin/goodTuringSmoothing > dmozRecreationGoodTuring.csv
+
+       # DO (NOT COPY-PASTE NEXT STATEMENT): Copy
+       #     dmozRecreationPrepGoodTuring.csv to HDFS:/user/paepcke/Dataset
+
+        
+       # Create word,follower,probability with Good-Turing
+       # smoothing. Keep only top-10 most probable ngrams for each
+       # word (10min):
+       smoothNgrams --limit 10 Datasets/DmozRecreation.gz_filtered.gz_strippedHTML.gz_main.gz_ngrams.csv.gz_culled.gz \
+                      Datasets/dmozRecreationGoodTuring.csv
+
+       # DO (NOT COPY-PASTE NEXT STATEMENT): Copy 
+       #     Datasets/DmozRecreation.gz_filtered.gz_strippedHTML.gz_main.gz_ngrams.csv.gz_culled.gz_smoothed.gz
+       # from HDFS to EchoTree server machine into ...src/echo_tree_experiment/Resources/dmozRecreation.
+       # put a gunzipped copy of this ngram file into the Resources
+       # directory as dmozRecreation.csv.
+
+       # Pull into Sqlite3 database:
+       sqlite3 dmozRecreation.db
+       .separator ","
+       CREATE TABLE Ngrams(word varchar(25), follower varchar(25), probability real);
+       BEGIN TRANSACTION;
+       .import dmozRecreation.csv Ngrams
+       CREATE INDEX wordFollCountIndx ON Ngrams (word, probability);
+       .exit
+
+- DmozRecreation (Trigrams Old):
+
+     o Number of recs in unfiltered crawl: 10,966,815 (8 min)
+        /usr/bin/time -v warcRecordCount Datasets/DmozRecreation
+
+     o Removing pages that came from the dmoz site itself (9 min):
+         # The backslash in '(?\!.*dmoz...' in the following just protects the '!' 
+         # from bash interpretation. It is not part of the regex:
+         /usr/bin/time -v warcFilter Datasets/DmozRecreation.gz "WARC-Target-URI" "(?s)(?\!.*dmoz).*" 
+	   Read   10,966,815 records (80,723,600,956 bytes) from: "hdfs://iln29.stanford.edu:9000/user/paepcke/Datasets/DmozRecreation.gz"
+	   Stored 10,660,409 records (41,982,509,108 bytes) in: "/user/paepcke/Datasets/DmozRecreation.gz_filtered.gz"
+
+     o Strip HTML (12 min):
+         /usr/bin/time -v warcStripHTML Datasets/Trigrams/DmozRecreation.gz_filtered.gz
+	   Read   10,660,409 records (41,982,542,190 bytes) from: "hdfs://ilhead2.stanford.edu:9000/user/paepcke/Datasets/Trigrams/DmozRecreation.gz_filtered.gz"
+           Stored 10,660,409 records (25,766,723,904 bytes) in: "/user/paepcke/Datasets/Trigrams/DmozRecreation.gz_filtered.gz_strippedHTML.gz"
+
+     o Set-aside 10% of Datasets/Trigrams/DmozRecreation.gz_filtered.gz_strippedHTML.gz (9 min):
+         /usr/bin/time -v warcSetAside Datasets/Trigrams/DmozRecreation.gz_filtered.gz_strippedHTML.gz 10.0
+           Read 10,660,409 records (25,766,757,488 bytes) from: "hdfs://ilhead2.stanford.edu:9000/user/paepcke/Datasets/Trigrams/DmozRecreation.gz_filtered.gz_strippedHTML.gz"
+	   Stored 1,066,276 records ( 1,632,765,780 bytes) in: "/user/paepcke/Datasets/Trigrams/DmozRecreation.gz_filtered.gz_strippedHTML.gz_sample.gz"
+	   Stored 9,276,447 records (14,352,225,146 bytes) in: "/user/paepcke/Datasets/Trigrams/DmozRecreation.gz_filtered.gz_strippedHTML.gz_main.gz"
+
+     o Trigrams over main collection; SKIPPED stopword removal,
+                   i.e. no --stopwords switch used!  (10min)
+        /usr/bin/time -v warcNgrams --minlength 2 --maxlength 20 Datasets/Trigrams/DmozRecreation.gz_filtered.gz_strippedHTML.gz_main.gz 3
+	   Read    9,276,447 records (14,352,248,249 bytes) from: "hdfs://ilhead2.stanford.edu:9000/user/paepcke/Datasets/Trigrams/DmozRecreation.gz_filtered.gz_strippedHTML.gz_main.gz"
+	   Stored 24,592,731 records (   154,061,807 bytes) in: "/user/paepcke/Datasets/Trigrams/DmozRecreation.gz_filtered.gz_strippedHTML.gz_main.gz_ngrams.csv.gz"
+
+     o Create frequency,frequency-of-frequency file for feeding into GoodTuring smoothing:
+        /usr/bin/time -v ngramFrequencies Datasets/Trigrams/DmozRecreation.gz_filtered.gz_strippedHTML.gz_main.gz_ngrams.csv.gz
+	   Read 24592731 records (155399201 bytes) from: "hdfs://ilhead2.stanford.edu:9000/user/paepcke/Datasets/Trigrams/DmozRecreation.gz_filtered.gz_strippedHTML.gz_main.gz_ngrams.csv.gz"
+	   Stored 8631 records (25095 bytes) in: "/user/paepcke/Datasets/Trigrams/DmozRecreation.gz_filtered.gz_strippedHTML.gz_main.gz_ngrams.csv.gz_fre
+        Generates:
+          ngramFrequencies Datasets/Trigrams/DmozRecreation.gz_filtered.gz_strippedHTML.gz_main.gz_ngrams.csv.gz_freqs.gz
+	                   
+     o Create CSV file of word,follower,probability:
+
+       On ilhead2:
+
+       .cptl Datasets/Trigrams/DmozRecreation.gz_filtered.gz_strippedHTML.gz_main.gz_ngrams.csv.gz_freqs.gz ~/Datasets/DmozRecreation/Trigrams
+       # Get a single-file copy
+       .pull Datasets/Trigrams/DmozRecreation.gz_filtered.gz_strippedHTML.gz_main.gz_ngrams.csv.gz_freqs.gz dmozRecreationFreqsTrigrams.csv.gz
+       # Take to mono's echo_tree_experiment Resources dir:
+       scp dmozRecreationFreqsTrigrams.csv.gz mono:fuerte/stacks/echo_tree_experiment/src/echo_tree_experiment/Resources/DmozRecreation/Trigrams
+
+       On mono/duo, etc.:
+
+       cd fuerte/stacks/echo_tree_experiment/src/echo_tree_experiment/Resources/DmozRecreation/Trigrams
+       # Save a gz'ed copy:
+       cp dmozRecreationFreqsTrigrams.csv.gz dmozRecreationFreqsTrigrams.csv.ORIG.gz
+       gunzip dmozRecreationFreqsTrigrams.csv.gz
+
+       # IF dmozRecreationFreqs.csv does not have "1,xxx" as first line:
+       # Add "1,1" as the first line to ensure shifting of probability mass to unseens:
+       echo "1,1" > dmozRecreationPrepGoodTuringTrigrams.csv
+
+       # Merge in the freq/freq-of-freqs file:
+       cat dmozRecreationFreqsTrigrams.csv >> dmozRecreationPrepGoodTuringTrigrams.csv
+
+       # Create Good-Turing estimate:
+       cat dmozRecreationPrepGoodTuringTrigrams.csv | ../../../../../bin/goodTuringSmoothing > dmozRecreationGoodTuringTrigrams.csv
+
+       # Copy  dmozRecreationGoodTuringTrigrams.csv to HDFS:/user/paepcke/Dataset
+       scp dmozRecreationGoodTuringTrigrams.csv ilhead2:/dfs/rulk/0/paepcke/Datasets/DmozRecreation/Trigrams
+        
+       Back on ilhead2:
+
+       cd ~/Datasets/DmozRecreation/Trigrams
+       .cpfl dmozRecreationGoodTuringTrigrams.csv Datasets/Trigrams
+
+       # Create word,follower,probability with Good-Turing
+       # smoothing. Keep only top-20 most probable ngrams for each
+       # word (10min):
+       /usr/bin/time -v smoothNgrams --limit 20 Datasets/Trigrams/DmozRecreation.gz_filtered.gz_strippedHTML.gz_main.gz_ngrams.csv.gz Datasets/Trigrams/dmozRecreationGoodTuringTrigrams.csv
+          Read       8,633 records from: "hdfs://ilhead2.stanford.edu:9000/user/paepcke/Datasets/Trigrams/dmozRecreationGoodTuringTrigrams.csv"
+	  Read  24,592,731 records from: "hdfs://ilhead2.stanford.edu:9000/user/paepcke/Datasets/Trigrams/DmozRecreation.gz_filtered.gz_strippedHTML.gz_main.gz_ngrams.csv.gz"
+	  Stored 3,821,091 records (35381650 bytes) in: "/user/paepcke/Datasets/Trigrams/DmozRecreation.gz_filtered.gz_strippedHTML.gz_main.gz_ngrams.csv.gz_smoothed.gz"
+
+       #Copy Datasets/Trigrams/DmozRecreation.gz_filtered.gz_strippedHTML.gz_main.gz_ngrams.csv.gz_smoothed.gz
+       # from HDFS to EchoTree server machine into
+       # ...src/echo_tree_experiment/Resources/dmozRecreation.
+       # put a gunzipped copy of this ngram file into the Resources
+       # directory as dmozRecreationTrigrams.csv.
+       cd ~/Datasets/DmozRecreation/Trigrams
+       .cptl Datasets/Trigrams/DmozRecreation.gz_filtered.gz_strippedHTML.gz_main.gz_ngrams.csv.gz_smoothed.gz .
+       .pull Datasets/Trigrams/DmozRecreation.gz_filtered.gz_strippedHTML.gz_main.gz_ngrams.csv.gz_smoothed.gz dmozRecreationTrigramsSmoothed.csv.gz
+       scp dmozRecreationTrigramsSmoothed.csv.gz mono:fuerte/stacks/echo_tree_experiment/src/echo_tree_experiment/Resources/DmozRecreation/Trigrams
+       
+       On Mono:
+
+       # Pull into Sqlite3 database echo_tree_experiment/Resources:
+       sqlite3 dmozRecreation.db
+       .separator ","
+       CREATE TABLE Bigrams(probability real, word1 varchar(25), word2 varchar(25));
+       CREATE TABLE Trigrams(probability real, word1 varchar(25), word2 varchar(25), word3 varchar(25));
+       BEGIN TRANSACTION;
+       .import dmozRecreationBigramsSmoothed.csv Bigrams
+       CREATE INDEX wordFollCountIndx ON Bigrams (word1, probability);
+       BEGIN TRANSACTION;
+       .import dmozRecreationTrigramsSmoothed.csv Trigrams
+       CREATE INDEX wordTrigramIndx ON Trigrams (word1, probability);
+       .exit
+
+- DmozRecreation (Bigrams):
+     o Number of recs in unfiltered crawl: 10,966,815 (8 min)
+        /usr/bin/time -v warcRecordCount Datasets/Bigrams/DmozRecreation
+
+     o Removing pages that came from the dmoz site itself (9 min):
+         # The backslash in '(?\!.*dmoz...' in the following just protects the '!' 
+         # from bash interpretation. It is not part of the regex:
+         /usr/bin/time -v warcFilter Datasets/Bigrams/DmozRecreation.gz "WARC-Target-URI" "(?s)(?\!.*dmoz).*" 
+	   Read   10,966,815 records (80,723,600,956 bytes) from: "hdfs://iln29.stanford.edu:9000/user/paepcke/Datasets/Bigrams/DmozRecreation.gz"
+	   Stored 10,660,409 records (41,982,509,108 bytes) in: "/user/paepcke/Datasets/Bigrams/DmozRecreation.gz_filtered.gz"
+
+     o Strip HTML (25 min):
+         /usr/bin/time -v warcStripHTML  Datasets/Bigrams/DmozRecreation.gz_filtered.gz
+	   Read   10,660,409 records (41982542112 bytes) from: "hdfs://ilhead2.stanford.edu:9000/user/paepcke/Datasets/Bigrams/DmozRecreation.gz_filtered.gz"
+	   Stored 10,660,409 records (25749931264 bytes) in: "/user/paepcke/Datasets/Bigrams/DmozRecreation.gz_filtered.gz_strippedHTML.gz"
+
+     o Set-aside 10% of Datasets/Trigrams/DmozRecreation.gz_filtered.gz_strippedHTML.gz (9 min):
+         # Fails writing to ..._main.gz, succeeds in writing to ..._sample.gz, but writes
+	 # everything there. 
+	 /usr/bin/time -v warcSetAside Datasets/Bigrams/DmozRecreation.gz_filtered.gz_strippedHTML.gz 10.0
+	   Read  10,660,409 records (25749964771 bytes) from: "hdfs://ilhead2.stanford.edu:9000/user/paepcke/Datasets/Bigrams/DmozRecreation.gz_filtered.gz_strippedHTML.gz"
+	   Stored 1,065,042 records (1625540316 bytes) in: "/user/paepcke/Datasets/Bigrams/DmozRecreation.gz_filtered.gz_strippedHTML.gz_sample.gz"
+	   Stored 9,278,205 records (14337172392 bytes) in: "/user/paepcke/Datasets/Bigrams/DmozRecreation.gz_filtered.gz_strippedHTML.gz_main.gz"
+
+     o Bigrams over main collection; SKIPPED stopword removal,
+                   i.e. no --stopwords switch used!  (11min)
+         /usr/bin/time -v warcNgrams --minlength 2 --maxlength 20 Datasets/Bigrams/DmozRecreation.gz_filtered.gz_strippedHTML.gz_main.gz 2
+	   Read    9,278,205 records (14337195444 bytes) from: "hdfs://ilhead2.stanford.edu:9000/user/paepcke/Datasets/Bigrams/DmozRecreation.gz_filtered.gz_strippedHTML.gz_main.gz"
+	   Stored 23,409,864 records (106457282 bytes) in: "/user/paepcke/Datasets/Bigrams/DmozRecreation.gz_filtered.gz_strippedHTML.gz_main.gz_ngrams.csv.gz"
+
+     o Create frequency,frequency-of-frequency file for feeding into
+        GoodTuring smoothing (6min):
+        /usr/bin/time -v ngramFrequencies Datasets/Bigrams/DmozRecreation.gz_filtered.gz_strippedHTML.gz_main.gz_ngrams.csv.gz
+	   Read 23,409,864 records (106458404 bytes) from: "hdfs://ilhead2.stanford.edu:9000/user/paepcke/Datasets/Bigrams/DmozRecreation.gz_filtered.gz_strippedHTML.gz_main.gz_ngrams.csv.gz"
+	   Stored   17,552 records (49082 bytes) in: "/user/paepcke/Datasets/Bigrams/DmozRecreation.gz_filtered.gz_strippedHTML.gz_main.gz_ngrams.csv.gz_freqs.gz"
+
+        Generates:
+          ngramFrequencies Datasets/Bigrams/DmozRecreation.gz_filtered.gz_strippedHTML.gz_main.gz_ngrams.csv.gz_freqs.gz
+	                   
+     o Create CSV file of probability,word1,word2:
+
+       pushd ~/Datasets/DmozRecreation/Bigrams
+       .cptl Datasets/Bigrams/DmozRecreation.gz_filtered.gz_strippedHTML.gz_main.gz_ngrams.csv.gz_freqs.gz .
+       # Get a single-file copy
+       .pull Datasets/Bigrams/DmozRecreation.gz_filtered.gz_strippedHTML.gz_main.gz_ngrams.csv.gz_freqs.gz dmozRecreationFreqsBigrams.csv.gz
+
+       # Save a gz'ed copy:
+       cp dmozRecreationFreqsBigrams.csv.gz dmozRecreationFreqsBigrams.csv.ORIG.gz
+       gunzip dmozRecreationFreqsBigrams.csv.gz
+
+       # IF dmozRecreationFreqs.csv does not have "1,xxx" as first line:
+       # Add "1,1" as the first line to ensure shifting of probability mass to unseens:
+       echo "1,1" > dmozRecreationPrepGoodTuringBigrams.csv
+
+       # Merge in the freq/freq-of-freqs file:
+       cat dmozRecreationFreqsBigrams.csv >> dmozRecreationPrepGoodTuringBigrams.csv
+
+       # Create Good-Turing estimate:
+       cat dmozRecreationPrepGoodTuringBigrams.csv | ~/EclipseWorkspaces/PigIR/bin/goodTuringSmoothing > dmozRecreationGoodTuringBigrams.csv
+
+       # Copy    dmozRecreationGoodTuringBigrams.csv to HDFS:
+       #     
+       .cpfl dmozRecreationGoodTuringBigrams.csv Datasets/Bigrams
+
+       # Back to PigIR root directory:
+       popd
+
+       # Create probability,word1,word2 with Good-Turing
+       # smoothing. Keep only top-20 most probable ngrams for each
+       # word (9 min):
+       /usr/bin/time -v smoothNgrams --limit 20 Datasets/Bigrams/DmozRecreation.gz_filtered.gz_strippedHTML.gz_main.gz_ngrams.csv.gz Datasets/Bigrams/dmozRecreationGoodTuringBigrams.csv
+           Read      17,554 records from: "hdfs://ilhead2.stanford.edu:9000/user/paepcke/Datasets/Bigrams/dmozRecreationGoodTuringBigrams.csv"
+	   Read  23,409,864 records from: "hdfs://ilhead2.stanford.edu:9000/user/paepcke/Datasets/Bigrams/DmozRecreation.gz_filtered.gz_strippedHTML.gz_main.gz_ngrams.csv.gz"
+	   Stored 5,055,284 records (34106130 bytes) in: "/user/paepcke/Datasets/Bigrams/DmozRecreation.gz_filtered.gz_strippedHTML.gz_main.gz_ngrams.csv.gz_smoothed.gz"
+
+       If wanting no limits on number of ngrams, do this instead (Version of May 20, 2:45):
+       /usr/bin/time -v smoothNgrams --limit 20 Datasets/Bigrams/DmozRecreation.gz_filtered.gz_strippedHTML.gz_main.gz_ngrams.csv.gz Datasets/Bigrams/dmozRecreationGoodTuringBigrams.csv
+	   Read 17577 records from: "hdfs://ilhead2.stanford.edu:9000/user/paepcke/Datasets/Bigrams/dmozRecreationGoodTuringBigrams.csv"
+	   Read 23241837 records from: "hdfs://ilhead2.stanford.edu:9000/user/paepcke/Datasets/Bigrams/DmozRecreation.gz_filtered.gz_strippedHTML.gz_main.gz_ngrams.csv.gz"
+	   Stored 23,241,837 records (114876007 bytes) in: "/user/paepcke/Datasets/Bigrams/DmozRecreation.gz_filtered.gz_strippedHTML.gz_main.gz_ngrams.csv.gz_smoothed.gz"
+
+       
+     o Create the test sentences from the set-aside for use with both bigrams and trigrams:
+       pig -param infile=Datasets/Bigrams/DmozRecreation.gz_filtered.gz_strippedHTML.gz_sample.gz \
+       	   -param outfile=Datasets/Bigrams/DmozRecreation.gz_filtered.gz_strippedHTML.gz_sample.gz_text.gz \
+	   src/main/PigScripts/CommandLineUtils/warcGetTextOnly.pig;
+
+	    Read   1,065,042 records (1625556247 bytes) from: "hdfs://ilhead2.stanford.edu:9000/user/paepcke/Datasets/Bigrams/DmozRecreation.gz_filtered.gz_strippedHTML.gz_sample.gz"
+	    Stored    54,404 records (15579802 bytes) in: "hdfs://ilhead2.stanford.edu:9000/user/paepcke/Datasets/Bigrams/DmozRecreation.gz_filtered.gz_strippedHTML.gz_sample.gz_text.gz"
+
+     o Pull text from HDFS:
+       pushd ~/Datasets/DmozRecreation
+       .pull Datasets/Bigrams/DmozRecreation.gz_filtered.gz_strippedHTML.gz_sample.gz_text.gz dmozRecreationTestText.txt.gz
+
+     o Clean text of html links (they are textual, no longer tagged, b/c of the HTML stripping earlier):
+       gunzip dmozRecreationTestText.txt.gz
+       java -jar ~/EclipseWorkspaces/PigIR/src/main/resources/textualHTMLLinksRemover.jar edu.stanford.pigir.TextualHTMLLinksRemover ./dmozRecreationTestText.txt ./dmozRecreationTestTextLinksGone.txt
+
+     o Replace all non-Ascii chars with periods ('.'):
+        cat dmozRecreationTestTextLinksGone.txt | tr '[\000-\011\013-\037\177-\377]' '.' > dmozRecreationTestTextLinksGoneNoUnicode.txt
+
+     o Copy to mono and duo:
+       scp dmozRecreationTestTextLinksGoneNoUnicode.txt mono:fuerte/stacks/echo_tree_experiment/src/echo_tree_experiment/Resources/DmozRecreation
+
+
+----
+
+       #Copy Datasets/Bigrams/DmozRecreation.gz_filtered.gz_strippedHTML.gz_main.gz_ngrams.csv.gz_smoothed.gz
+       # from HDFS to EchoTree server machine into
+       # ...src/echo_tree_experiment/Resources/dmozRecreation.
+       # put a gunzipped copy of this ngram file into the Resources
+       # directory as dmozRecreationBigrams.csv.
+       cd ~/Datasets/DmozRecreation/Bigrams
+       .cptl Datasets/Bigrams/DmozRecreation.gz_filtered.gz_strippedHTML.gz_main.gz_ngrams.csv.gz_smoothed.gz .
+       .pull Datasets/Bigrams/DmozRecreation.gz_filtered.gz_strippedHTML.gz_main.gz_ngrams.csv.gz_smoothed.gz dmozRecreationBigramsSmoothed.csv.gz
+       scp dmozRecreationBigramsSmoothed.csv.gz mono:fuerte/stacks/echo_tree_experiment/src/echo_tree_experiment/Resources/DmozRecreation/Bigrams
+
+       On Mono:
+
+       pushd ~/fuerte/stacks/echo_tree_experiment/src/echo_tree_experiment/Resources/DmozRecreation/Bigrams
+       cp dmozRecreationBigramsSmoothed.csv.gz dmozRecreationBigramsSmoothed.csv.gz.ORIG
+       gunzip dmozRecreationBigramsSmoothed.csv.gz
+       mv dmozRecreationBigramsSmoothed.csv ../..
+       
+       # Pull into Sqlite3 database echo_tree_experiment/Resources
+       # (DROP TABLE Bigrams; if needed):
+       cd ../..
+       sqlite3 dmozRecreation.db
+       .separator ","
+       CREATE TABLE Bigrams(probability real, word1 varchar(25), word2 varchar(25));
+       CREATE TABLE Trigrams(probability real, word1 varchar(25), word2 varchar(25), word3 varchar(25));
+       BEGIN TRANSACTION;
+       .import dmozRecreationBigramsSmoothed.csv Bigrams
+       CREATE INDEX wordFollCountIndx ON Bigrams (word1, word2, probability);
+       BEGIN TRANSACTION;
+       .import dmozRecreationTrigramsSmoothed.csv Trigrams
+       CREATE INDEX wordTrigramIndx ON Trigrams (word1, probability);
+       .exit
+
+- DmozRecreation (Trigrams):
+     o Number of recs in unfiltered crawl: 10,966,815 (8 min)
+        /usr/bin/time -v warcRecordCount Datasets/Trigrams/DmozRecreation
+
+     o Removing pages that came from the dmoz site itself (9 min):
+         # The backslash in '(?\!.*dmoz...' in the following just protects the '!' 
+         # from bash interpretation. It is not part of the regex:
+         /usr/bin/time -v warcFilter Datasets/Trigrams/DmozRecreation.gz "WARC-Target-URI" "(?s)(?\!.*dmoz).*" 
+	   Read   10,966,815 records (80,723,600,956 bytes) from: "hdfs://iln29.stanford.edu:9000/user/paepcke/Datasets/Trigrams/DmozRecreation.gz"
+	   Stored 10,660,409 records (41,982,509,108 bytes) in: "/user/paepcke/Datasets/Trigrams/DmozRecreation.gz_filtered.gz"
+
+     o Strip HTML (25 min):
+         /usr/bin/time -v warcStripHTML  Datasets/Trigrams/DmozRecreation.gz_filtered.gz
+	   Read   10,660,409 records (41,982,542,112 bytes) from: "hdfs://ilhead2.stanford.edu:9000/user/paepcke/Datasets/Trigrams/DmozRecreation.gz_filtered.gz"
+	   Stored 10,660,409 records (25,766,723,904 bytes) in: "/user/paepcke/Datasets/Trigrams/DmozRecreation.gz_filtered.gz_strippedHTML.gz"
+
+     o  Set-aside 10% of Datasets/Bigrams/DmozRecreation.gz_filtered.gz_strippedHTML.gz (9 min):
+         /usr/bin/time -v warcSetAside Datasets/Trigrams/DmozRecreation.gz_filtered.gz_strippedHTML.gz 10.0
+           Read 10,660,409 records (25,766,757,488 bytes) from: "hdfs://ilhead2.stanford.edu:9000/user/paepcke/Datasets/Trigrams/DmozRecreation.gz_filtered.gz_strippedHTML.gz"
+	   Stored 1,066,276 records ( 1,632,765,780 bytes) in: "/user/paepcke/Datasets/Trigrams/DmozRecreation.gz_filtered.gz_strippedHTML.gz_sample.gz"
+	   Stored 9,276,447 records (14,352,225,146 bytes) in: "/user/paepcke/Datasets/Trigrams/DmozRecreation.gz_filtered.gz_strippedHTML.gz_main.gz"
+
+     o Trigrams over main collection; SKIPPED stopword removal,
+                   i.e. no --stopwords switch used!  (14min)
+          #******* Puts result into Datasets/Trigrams/Datasets/Bigrams. Had 
+	  # to move DmozRecreation.gz_filtered.gz_strippedHTML.gz_main.gz_ngrams.csv.gz from there to Datasets/Trigrams,
+	  # and .rmr delete Datasets/Trigrams/Datasets
+         /usr/bin/time -v warcNgrams --minlength 2 --maxlength 20 --destdir Datasets/Trigrams Datasets/Bigrams/DmozRecreation.gz_filtered.gz_strippedHTML.gz_main.gz 3
+	   Read    9,278,205 records (14337195444 bytes) from: "hdfs://ilhead2.stanford.edu:9000/user/paepcke/Datasets/Bigrams/DmozRecreation.gz_filtered.gz_strippedHTML.gz_main.gz"
+	   Stored 28,423,891 records (182170907 bytes) in: "hdfs://ilhead2.stanford.edu:9000/user/paepcke/Datasets/Trigrams/Datasets/Bigrams/DmozRecreation.gz_filtered.gz_strippedHTML.gz_main.gz_ngrams.csv.gz"
+
+     o Create frequency,frequency-of-frequency file for feeding into
+        GoodTuring smoothing (6min):
+        /usr/bin/time -v ngramFrequencies Datasets/Trigrams/DmozRecreation.gz_filtered.gz_strippedHTML.gz_main.gz_ngrams.csv.gz
+	   Read  28,423,891 records (182172336 bytes) from: "hdfs://ilhead2.stanford.edu:9000/user/paepcke/Datasets/Trigrams/DmozRecreation.gz_filtered.gz_strippedHTML.gz_main.gz_ngrams.csv.gz"
+	   Stored    14,701 records (41445 bytes) in: "/user/paepcke/Datasets/Trigrams/DmozRecreation.gz_filtered.gz_strippedHTML.gz_main.gz_ngrams.csv.gz_freqs.gz"
+
+        Generates:
+          ngramFrequencies Datasets/Trigrams/DmozRecreation.gz_filtered.gz_strippedHTML.gz_main.gz_ngrams.csv.gz_freqs.gz
+	                   
+     o Create CSV file of probability,word1,word2,word3:
+
+       pushd ~/Datasets/DmozRecreation/Trigrams
+       .cptl Datasets/Trigrams/DmozRecreation.gz_filtered.gz_strippedHTML.gz_main.gz_ngrams.csv.gz_freqs.gz .
+       # Get a single-file copy
+       .pull Datasets/Trigrams/DmozRecreation.gz_filtered.gz_strippedHTML.gz_main.gz_ngrams.csv.gz_freqs.gz dmozRecreationFreqsTrigrams.csv.gz
+
+       # Save a gz'ed copy:
+       cp dmozRecreationFreqsTrigrams.csv.gz dmozRecreationFreqsTrigrams.csv.ORIG.gz
+       gunzip dmozRecreationFreqsTrigrams.csv.gz
+
+       # IF dmozRecreationFreqs.csv does not have "1,xxx" as first line:
+       # Add "1,1" as the first line to ensure shifting of probability mass to unseens:
+       echo "1,1" > dmozRecreationPrepGoodTuringTrigrams.csv
+
+       # Merge in the freq/freq-of-freqs file:
+       cat dmozRecreationFreqsTrigrams.csv >> dmozRecreationPrepGoodTuringTrigrams.csv
+
+       # Create Good-Turing estimate:
+       cat dmozRecreationPrepGoodTuringTrigrams.csv | ~/EclipseWorkspaces/PigIR/bin/goodTuringSmoothing > dmozRecreationGoodTuringTrigrams.csv
+
+       # Copy    dmozRecreationGoodTuringTrigrams.csv to HDFS:
+       #     
+       .cpfl dmozRecreationGoodTuringTrigrams.csv Datasets/Trigrams
+
+       # Back to PigIR root directory:
+       popd
+
+       # Create probability,word1,word2 with Good-Turing
+       # smoothing. Do not use --limit 20 to keep only top-20 
+       # most probable ngrams for each word. That feature is broken
+       # in the pig script.
+       # (9 min):
+       /usr/bin/time -v smoothNgrams Datasets/Trigrams/DmozRecreation.gz_filtered.gz_strippedHTML.gz_main.gz_ngrams.csv.gz Datasets/Trigrams/dmozRecreationGoodTuringTrigrams.csv
+          Read       14,703 records from: "hdfs://ilhead2.stanford.edu:9000/user/paepcke/Datasets/Trigrams/dmozRecreationGoodTuringTrigrams.csv"
+	  Read   28,423,891 records from: "hdfs://ilhead2.stanford.edu:9000/user/paepcke/Datasets/Trigrams/DmozRecreation.gz_filtered.gz_strippedHTML.gz_main.gz_ngrams.csv.gz"
+	  Stored 28,423,891 records (202282197 bytes) in: "/user/paepcke/Datasets/Trigrams/DmozRecreation.gz_filtered.gz_strippedHTML.gz_main.gz_ngrams.csv.gz_smoothed.gz"
+
+       #Copy Datasets/Trigrams/DmozRecreation.gz_filtered.gz_strippedHTML.gz_main.gz_ngrams.csv.gz_smoothed.gz
+       # from HDFS to EchoTree server machine into
+       # ...src/echo_tree_experiment/Resources/dmozRecreation.
+       # put a gunzipped copy of this ngram file into the Resources
+       # directory as dmozRecreationTrigrams.csv.
+       pushd ~/Datasets/DmozRecreation/Trigrams
+       .cptl Datasets/Trigrams/DmozRecreation.gz_filtered.gz_strippedHTML.gz_main.gz_ngrams.csv.gz_smoothed.gz .
+       .pull Datasets/Trigrams/DmozRecreation.gz_filtered.gz_strippedHTML.gz_main.gz_ngrams.csv.gz_smoothed.gz dmozRecreationTrigramsSmoothed.csv.gz
+       scp dmozRecreationTrigramsSmoothed.csv.gz mono:fuerte/stacks/echo_tree_experiment/src/echo_tree_experiment/Resources/DmozRecreation/Trigrams
+
+       On Mono:
+
+       pushd ~/fuerte/stacks/echo_tree_experiment/src/echo_tree_experiment/Resources/DmozRecreation/Trigrams
+       cp dmozRecreationTrigramsSmoothed.csv.gz dmozRecreationTrigramsSmoothed.csv.gz.ORIG
+       gunzip dmozRecreationTrigramsSmoothed.csv.gz
+       mv dmozRecreationTrigramsSmoothed.csv ../..
+       
+       # Pull into Sqlite3 database echo_tree_experiment/Resources
+       # (DROP TABLE Trigrams; if needed):
+       cd ../..
+       sqlite3 dmozRecreation.db
+       .separator ","
+       CREATE TABLE Bigrams(probability real, word1 varchar(25), word2 varchar(25));
+       CREATE TABLE Trigrams(probability real, word1 varchar(25), word2 varchar(25), word3 varchar(25));
+       BEGIN TRANSACTION;
+       .import dmozRecreationBigramsSmoothed.csv Bigrams
+       CREATE INDEX wordFollCountIndx ON Bigrams (word1, word2, probability);
+       BEGIN TRANSACTION;
+       .import dmozRecreationTrigramsSmoothed.csv Trigrams
+       CREATE INDEX wordTrigramIndx ON Trigrams (word1, word3, probability);
+       .exit
+
+- Henry Blog (did all on Mono):
+
+     o In Emacs: create blogSentenceParsed.txt like this:
+          * Put each sentence on its on line (cut at '?', '!', and '.')
+	  * Remove double quotes
+	  * Remove URLs
+     o Separate out 5% for testing before ngram creation:
+          * On Linux cmd line: 
+               shuf -o shuffledBlogSentenceParsed.txt blogSentenceParsed.txt 
+          * In Emacs, separate the top 60 sentences from the rest,
+	    creating henryBlogShuffledMain.txt and henryBlogFivePercent.txt
+     
+     o In Eclipse: export runnable jar of NgramPlainText.java into 
+       target/ngramPlainText.jar
+
+     o java -jar target/ngramPlainText.jar /home/paepcke/fuerte/stacks/echo_tree_experiment/src/echo_tree_experiment/Resources/Henry/henryBlogMainShuffled.txt /home/paepcke/fuerte/stacks/echo_tree_experiment/src/echo_tree_experiment/Resources/Henry/henryBlogMainShuffled.csv
+     
+     o create henryBlog.db:
+
+           sqlite3 henryBlog.db
+           .separator ","
+           CREATE TABLE Bigrams(probability real, word1 varchar(25), word2 varchar(25));
+           CREATE TABLE Trigrams(probability real, word1 varchar(25), word2 varchar(25), word3 varchar(25));
+           BEGIN TRANSACTION;
+	   .import henryBlogMainShuffledBigrams.csv Bigrams
+           BEGIN TRANSACTION;
+           .import henryBlogMainShuffledTrigrams.csv Trigrams
+           CREATE INDEX wordBigramIndex ON Bigrams (word1, word2, probability);
+           CREATE INDEX wordTrigramIndex ON Trigrams (word1, probability);
+           .exit
+
+     o In echo_tree_experiment: 
+         * Add HENRY_BLOG wherever DMOZ_RECREATION occurs
+
+- DmozShopping:
+
+     o Number of recs in unfiltered crawl: 7,035,017 (5 min)
+        /usr/bin/time -v warcRecordCount Datasets/DmozShopping
+
+     o Removing pages that came from the dmoz site itself (5 min):
+          Read   7,035,017 records (35,289,641,028 bytes) from: "hdfs://iln29.stanford.edu:9000/user/paepcke/Datasets/DmozShopping.gz"
+	  Stored 6,986,039 records (23,341,009,589 bytes) in: "/user/paepcke/Datasets/DmozShopping.gz_filtered.gz"
+         # The backslash in '(?\!.*dmoz...' in the following just protects the '!' 
+         # from bash interpretation. It is not part of the regex:
+         /usr/bin/time -v warcFilter Datasets/DmozShopping.gz "WARC-Target-URI" "(?s)(?\!.*dmoz).*" 
+
+     o Strip HTML (8 min)
+         Read   6,986,039 records (23,341,024,114 bytes) from: "hdfs://iln29.stanford.edu:9000/user/paepcke/Datasets/DmozShopping.gz_filtered.gz"
+	 Stored 6,986,039 records (14,299,358,567 bytes) in: "/user/paepcke/Datasets/DmozShopping.gz_filtered.gz_strippedHTML.gz"
+         /usr/bin/time -v warcStripHTML Datasets/DmozShopping.gz_filtered.gz
+
+     o Set-aside 10% of Datasets/DmozRecreation.gz_filtered.gz_strippedHTML.gz (23 min):
+        /usr/bin/time -v warcSetAside
+        Datasets/DmozRecreation.gz_filtered.gz_strippedHTML.gz 10.0
+
+        Apparently while writing to main (sample seems done):
+	     ERROR org.apache.pig.tools.grunt.GruntParser - org.apache.pig.backend.executionengine.ExecException: ERROR 2997: Unable to recreate exception from backed error: java.lang.RuntimeException: Unexpected data type 113 found in stream.
+	    	at org.apache.pig.data.BinInterSedes.readDatum(BinInterSedes.java:342)
+	    	at org.apache.pig.data.BinInterSedes.readDatum(BinInterSedes.java:251)
+	    	at org.apache.pig.data.BinInterSedes.readTuple(BinInterSedes.java:111)
+	    	at org.apache.pig.data.BinInterSedes.readDatum(BinInterSedes.java:270)
+
+- Fisher Collection Part 1 and 2:
+
+     o 11,699 complete conversations, each lasting up to 10 minutes
+     o " (( ... )) " means transcriber unsure what was said.
+     o 12% transcribed at LCD like this: One plain-text transcript file per conversation.
+     o 88% transcribed at BBN: five text files for each conversation:
+       	    the original manual transcript (with no time stamps), and four
+       	    separate outputs from the forced-alignment process.  
+     o The "bbn_orig" directory contains just the transcript data
+       	    created by BBN, while the "trans" directory contains the union
+       	    of BBN and LDC transcripts (i.e. the entire corpus), rendered
+       	    entirely in the LDC style. (Calls that were transcribed by the
+       	    LDC will not be found under the "bbn_orig" directory.)  
+     o Call metadata, incl. topic (40 topics): doc/fe_03_p2_calldata.tbl
+
+     o .mkdir Datasets/Fisher
+     o cd ~/Datasets/  # on ilhead2
+     o .cpfl FisherConversations Datasets/Fisher/Conversations
+
+- Fisher Collection:
+
+     o Combine original transcripts into one root dir on ilhome2:
+         cd ~/Datasets/FisherConversations
+	 mkdir OrigTranscripts
+	 cp -r /afs/cs/group/infolab/datasets/snap-private/FisherEnglishTraining/fe_03_p1_tran/data/trans/ OrigTranscripts/
+         mkdir CleanWarcTranscripts
+     o Clean the transcripts:
+         cd ~/EclipseWorkspaces/PigIR												   
+         java -jar src/main/resources/fisherCollectionProcessor.jar \
+	      edu.stanford.pigir.fishercollection.FisherCollectionProcessor \
+	      /dfs/rulk/0/paepcke/Datasets/FisherConversations/OrigTranscripts/trans \
+	      /dfs/rulk/0/paepcke/Datasets/FisherConversations/CleanWarcTranscripts
+     o Creat WARC files from cleaned conversations:
+         /dfs/rulk/0/paepcke/Datasets/FisherConversations/CleanWarcTranscripts
+         gzip *.warc
+
+     o Copy cleaned conversations to HDFS:
+       ~/Datasets/FisherConversations/CleanWarcTranscripts
+       .cpfl *.gz Datasets/Fisher/Conversations
+
+     o Set aside 10% (2.5 minutes) TRY TO CHANGE --destdir to full path to avoid having to mv below)
+      /usr/bin/time -v warcSetAside --destdir Datasets/Fisher/  Datasets/Fisher/Conversations 10.0
+	 Read 11,315 records (45141807 bytes) from: "hdfs://ilhead2.stanford.edu:9000/user/paepcke/Datasets/Fisher/Conversations"
+	 Stored 1,078 records (3443990 bytes) in: "hdfs://ilhead2.stanford.edu:9000/user/paepcke/Datasets/Fisher/Datasets/Fisher/Conversations_sample.gz"
+	 Stored 10,237 records (31597987 bytes) in: "hdfs://ilhead2.stanford.edu:9000/user/paepcke/Datasets/Fisher/Datasets/Fisher/Conversations_main.gz"
+
+     o Move sample and main to a nicer place:
+         .mv /user/paepcke/Datasets/Fisher/Datasets/Fisher/Conversations_main.gz Datasets/Fisher
+	 .mv /user/paepcke/Datasets/Fisher/Datasets/Fisher/Conversations_sample.gz Datasets/Fisher
+	 .rmr /user/paepcke/Datasets/Fisher/Datasets/Fisher/Conversations_main.gz Datasets/Fisher/Datasets
+
+   Bigrams:
+
+     o Bigrams over main collection; SKIPPED stopword removal,
+                   i.e. no --stopwords switch used!  (4.5 min)
+         /usr/bin/time -v warcNgrams --minlength 2 --maxlength 20 --destdir /user/paepcke/Datasets/Fisher/Bigrams Datasets/Fisher/Conversations_main.gz 2
+	  Read    10,237 records (31598405 bytes) from: "hdfs://ilhead2.stanford.edu:9000/user/paepcke/Datasets/Fisher/Conversations_main.gz"
+	  Stored 517,852 records (2129009 bytes) in: "/user/paepcke/Datasets/Fisher/Bigrams/Datasets/Fisher/Conversations_main.gz_ngrams.csv.gz"
+
+     o .mv Datasets/Fisher/Bigrams/Datasets/Fisher/Conversations_main.gz_ngrams.csv.gz Datasets/Fisher/Bigrams/
+       .rmr Datasets/Fisher/Bigrams/Datasets
+
+
+     o Create frequency,frequency-of-frequency file for feeding into
+        GoodTuring smoothing (2.5min):
+        /usr/bin/time -v ngramFrequencies Datasets/Fisher/Bigrams/Conversations_main.gz_ngrams.csv.gz
+	   Read 517,852 records (2,130,001 bytes) from: "hdfs://ilhead2.stanford.edu:9000/user/paepcke/Datasets/Fisher/Bigrams/Conversations_main.gz_ngrams.csv.gz"
+	   Stored 2,430 records (6,525 bytes) in: "/user/paepcke/Datasets/Fisher/Bigrams/Conversations_main.gz_ngrams.csv.gz_freqs.gz"
+
+     o Create CSV file of probability,word1,word2:
+
+       pushd ~/Datasets/FisherConversations/Bigrams
+       .cptl Datasets/Fisher/Bigrams/Conversations_main.gz_ngrams.csv.gz_freqs.gz .
+       # Get a single-file copy
+       .pull Datasets/Fisher/Bigrams/Conversations_main.gz_ngrams.csv.gz_freqs.gz fisherFreqsBigrams.csv.gz
+
+       # Save a gz'ed copy:
+       cp fisherFreqsBigrams.csv.gz fisherFreqsBigrams.csv.ORIG.gz
+       gunzip fisherFreqsBigrams.csv.gz
+
+       # IF fisherFreqs.csv does not have "1,xxx" as first line:
+       # Add "1,1" as the first line to ensure shifting of probability mass to unseens:
+       echo "1,1" > fisherPrepGoodTuringBigrams.csv
+
+       # Merge in the freq/freq-of-freqs file:
+       cat fisherFreqsBigrams.csv >> fisherPrepGoodTuringBigrams.csv
+
+       # Create Good-Turing estimate:
+       cat fisherPrepGoodTuringBigrams.csv | ~/EclipseWorkspaces/PigIR/bin/goodTuringSmoothing > fisherGoodTuringBigrams.csv
+
+       # Copy fisherGoodTuringBigrams.csv to HDFS:
+       #     
+       .cpfl fisherGoodTuringBigrams.csv Datasets/Fisher/Bigrams
+
+       # Back to PigIR root directory:
+       popd
+
+       # Create probability,word1,word2 with Good-Turing
+       # smoothing. Keep only top-20 most probable ngrams for each
+       # word (1.5 min):
+       /usr/bin/time -v smoothNgrams --limit 20 Datasets/Fisher/Bigrams/Conversations_main.gz_ngrams.csv.gz Datasets/Fisher/Bigrams/fisherGoodTuringBigrams.csv
+	   Read     2,432 records from: "hdfs://ilhead2.stanford.edu:9000/user/paepcke/Datasets/Fisher/Bigrams/fisherGoodTuringBigrams.csv"
+	   Read   517,852 records from: "hdfs://ilhead2.stanford.edu:9000/user/paepcke/Datasets/Fisher/Bigrams/Conversations_main.gz_ngrams.csv.gz"
+	   Stored 149,789 records (692293 bytes) in: "/user/paepcke/Datasets/Fisher/Bigrams/Conversations_main.gz_ngrams.csv.gz_smoothed.gz"
+
+----
+
+       #Copy Datasets/Fisher/Bigrams/Conversations_main.gz_ngrams.csv.gz_smoothed.gz"
+       # from HDFS to EchoTree server machine into
+       # ...src/echo_tree_experiment/Resources/Fisher
+       # put a gunzipped copy of this ngram file into the Resources
+       # directory as fisherBigrams.csv.
+       cd ~/Datasets/FisherConversations/Bigrams
+       .cptl Datasets/Fisher/Bigrams/Conversations_main.gz_ngrams.csv.gz_smoothed.gz .
+       .pull Datasets/Fisher/Bigrams/Conversations_main.gz_ngrams.csv.gz_smoothed.gz fisherBigramsSmoothed.csv.gz
+       scp fisherBigramsSmoothed.csv.gz mono:fuerte/stacks/echo_tree_experiment/src/echo_tree_experiment/Resources/Fisher/Bigrams
+
+       On Mono:
+
+       pushd ~/fuerte/stacks/echo_tree_experiment/src/echo_tree_experiment/Resources/Fisher/Bigrams
+       cp fisherBigramsSmoothed.csv.gz fisherBigramsSmoothed.csv.gz.ORIG
+       gunzip fisherBigramsSmoothed.csv.gz
+       mv fisherBigramsSmoothed.csv ../..
+
+       # Pull into Sqlite3 database echo_tree_experiment/Resources
+       # (DROP TABLE Bigrams; if needed):
+       cd ../..
+       sqlite3 fisherConversations.db
+       .separator ","
+       CREATE TABLE Bigrams(probability real, word1 varchar(25), word2 varchar(25));
+       CREATE TABLE Trigrams(probability real, word1 varchar(25), word2 varchar(25), word3 varchar(25));
+       BEGIN TRANSACTION;
+       .import fisherBigramsSmoothed.csv Bigrams
+       CREATE INDEX wordFollCountIndx ON Bigrams (word1, word2, probability);
+       BEGIN TRANSACTION;
+       .import fisherTrigramsSmoothed.csv Trigrams
+       CREATE INDEX wordTrigramIndx ON Trigrams (word1, probability);
+       .exit
+
+   Trigrams:
+     o Trigrams over main collection; SKIPPED stopword removal,
+                   i.e. no --stopwords switch used!  (5 min)
+         /usr/bin/time -v warcNgrams --minlength 2 --maxlength 20 --destdir /user/paepcke/Datasets/Fisher/Trigrams Datasets/Fisher/Conversations_main.gz 3
+	   Read      10,237 records (31598405 bytes) from: "hdfs://ilhead2.stanford.edu:9000/user/paepcke/Datasets/Fisher/Conversations_main.gz"
+	   Stored 1,178,915 records (5017025 bytes) in: "/user/paepcke/Datasets/Fisher/Trigrams/Datasets/Fisher/Conversations_main.gz_ngrams.csv.gz"
+
+     o .mv Datasets/Fisher/Trigrams/Datasets/Fisher/Conversations_main.gz_ngrams.csv.gz Datasets/Fisher/Trigrams/
+       .rmr Datasets/Fisher/Trigrams/Datasets
+
+
+     o Create frequency,frequency-of-frequency file for feeding into
+        GoodTuring smoothing (2.5min):
+        /usr/bin/time -v ngramFrequencies Datasets/Fisher/Trigrams/Conversations_main.gz_ngrams.csv.gz
+	   Read 1,178,915 records (5018022 bytes) from: "hdfs://ilhead2.stanford.edu:9000/user/paepcke/Datasets/Fisher/Trigrams/Conversations_main.gz_ngrams.csv.gz"
+	   Stored   1,265 records (3393 bytes) in: "/user/paepcke/Datasets/Fisher/Trigrams/Conversations_main.gz_ngrams.csv.gz_freqs.gz"
+
+     o Create CSV file of probability,word1,word2:
+
+       pushd ~/Datasets/FisherConversations/Trigrams
+       .cptl Datasets/Fisher/Trigrams/Conversations_main.gz_ngrams.csv.gz_freqs.gz .
+       # Get a single-file copy
+       .pull Datasets/Fisher/Trigrams/Conversations_main.gz_ngrams.csv.gz_freqs.gz fisherFreqsTrigrams.csv.gz
+
+       # Save a gz'ed copy:
+       cp fisherFreqsTrigrams.csv.gz fisherFreqsTrigrams.csv.ORIG.gz
+       gunzip fisherFreqsTrigrams.csv.gz
+
+       # IF fisherFreqs.csv does not have "1,xxx" as first line:
+       # Add "1,1" as the first line to ensure shifting of probability mass to unseens:
+       echo "1,1" > fisherPrepGoodTuringTrigrams.csv
+
+       # Merge in the freq/freq-of-freqs file:
+       cat fisherFreqsTrigrams.csv >> fisherPrepGoodTuringTrigrams.csv
+
+       # Create Good-Turing estimate:
+       cat fisherPrepGoodTuringTrigrams.csv | ~/EclipseWorkspaces/PigIR/bin/goodTuringSmoothing > fisherGoodTuringTrigrams.csv
+
+       # Copy fisherGoodTuringTrigrams.csv to HDFS:
+       #     
+       .cpfl fisherGoodTuringTrigrams.csv Datasets/Fisher/Trigrams
+
+       # Back to PigIR root directory:
+       popd
+
+       # Create probability,word1,word2 with Good-Turing
+       # smoothing. Keep only top-20 most probable ngrams for each
+       # word (2 min):
+       /usr/bin/time -v smoothNgrams --limit 20 Datasets/Fisher/Trigrams/Conversations_main.gz_ngrams.csv.gz Datasets/Fisher/Trigrams/fisherGoodTuringTrigrams.csv
+           Read     1,267 records from: "hdfs://ilhead2.stanford.edu:9000/user/paepcke/Datasets/Fisher/Trigrams/fisherGoodTuringTrigrams.csv"
+	   Read 1,178,915 records from: "hdfs://ilhead2.stanford.edu:9000/user/paepcke/Datasets/Fisher/Trigrams/Conversations_main.gz_ngrams.csv.gz"
+	   Stored  93,534 records (502050 bytes) in: "/user/paepcke/Datasets/Fisher/Trigrams/Conversations_main.gz_ngrams.csv.gz_smoothed.gz"
+----
+
+       #Copy Datasets/Fisher/Trigrams/Conversations_main.gz_ngrams.csv.gz_smoothed.gz"
+       # from HDFS to EchoTree server machine into
+       # ...src/echo_tree_experiment/Resources/Fisher
+       # put a gunzipped copy of this ngram file into the Resources
+       # directory as fisherTrigrams.csv.
+       cd ~/Datasets/FisherConversations/Trigrams
+       .cptl Datasets/Fisher/Trigrams/Conversations_main.gz_ngrams.csv.gz_smoothed.gz .
+       .pull Datasets/Fisher/Trigrams/Conversations_main.gz_ngrams.csv.gz_smoothed.gz fisherTrigramsSmoothed.csv.gz
+       scp fisherTrigramsSmoothed.csv.gz mono:fuerte/stacks/echo_tree_experiment/src/echo_tree_experiment/Resources/Fisher/Trigrams
+
+       On Mono:
+
+       pushd ~/fuerte/stacks/echo_tree_experiment/src/echo_tree_experiment/Resources/Fisher/Trigrams
+       cp fisherTrigramsSmoothed.csv.gz fisherTrigramsSmoothed.csv.gz.ORIG
+       gunzip fisherTrigramsSmoothed.csv.gz
+       mv fisherTrigramsSmoothed.csv ../..
+
+       # Pull into Sqlite3 database echo_tree_experiment/Resources
+       # (DROP TABLE Bigrams; if needed):
+       cd ../..
+       sqlite3 fisherConversations.db
+       .separator ","
+       CREATE TABLE Bigrams(probability real, word1 varchar(25), word2 varchar(25));
+       CREATE TABLE Trigrams(probability real, word1 varchar(25), word2 varchar(25), word3 varchar(25));
+       BEGIN TRANSACTION;
+       .import fisherBigramsSmoothed.csv Bigrams
+       CREATE INDEX wordFollCountIndx ON Bigrams (word1, word2, probability);
+       BEGIN TRANSACTION;
+       .import fisherTrigramsSmoothed.csv Trigrams
+       CREATE INDEX wordTrigramIndx ON Trigrams (word1, probability);
+       .exit
+
+
+Running measurements
+---------------------
+
+- Automated evaluation of echo trees
+     o Tokenize the test sentences. Tokenizer is in ~/fuerte/stacks/echo_tree_sentence_seg
+       Run via:
+          src/echo_tree_experiment/Tokenization/tokenizeText.sh {textDir | textFile} [targetDir]
+       Without out directory: will created token files in input dir. All files have '_Tokens' appended
+   
+     o Tokenize Henry blogs:
+          src/echo_tree_experiment/Tokenization/tokenizeText.sh henryBlogFivePercent.txt
+
+     o export PYTHONPATH=$HOME/fuerte/stacks/echo_tree_experiment/src
+
+     o Henry measure blog bigrams:
+          src/echo_tree_experiment/Evaluation/echo_tree_eval.py \
+	      src/echo_tree_experiment/Measurements/henryBlogPerformanceBigrams.csv \
+	      src/echo_tree_experiment/Resources/henryBlog.db \
+	      2 \
+	      src/echo_tree_experiment/Resources/Henry/henryBlogFivePercent_Tokens.txt 
+
+     o Henry measure blog trigrams:
+          src/echo_tree_experiment/Evaluation/echo_tree_eval.py \
+	      src/echo_tree_experiment/Measurements/henryBlogPerformanceTrigrams.csv \
+	      src/echo_tree_experiment/Resources/henryBlog.db \
+	      3 \
+	      src/echo_tree_experiment/Resources/Henry/henryBlogFivePercent_Tokens.txt 
+
+     o Fisher get sample sentences:
+          cd ~/Datasets/Fisher
+          .pull Datasets/Fisher/Conversations_sample.gz conversationsSample.gz
+	  scp conversationsSample.gz mono:fuerte/stacks/echo_tree_experiment/src/echo_tree_experiment/Resources/Fisher
+          On Linux cmd line: shuffle the sentences randomly, output to shuffledFisherSentences.txt:
+               shuf -o shuffledFisherSentences.txt conversationsSample.txt
+          In emacs, take first 60 sentences, and store in fisherTestSentences.txt
+
+     o Fisher tokenize Fisher sample sentences:
+          # On Mono:
+	  cd ~/fuerte/stacks/echo_tree_experiment/src/echo_tree_experiment/Resources/Fisher
+	  gunzip conversationsSample.gz
+	  mv conversationsSample conversationsSample.txt
+          # Mono at root of echo_tree_experiment:
+          src/echo_tree_experiment/Tokenization/tokenizeText.sh src/echo_tree_experiment/Resources/Fisher/fisherTestSentences.txt
+
+     o Fisher measure bigrams:
+          src/echo_tree_experiment/Evaluation/echo_tree_eval.py --verbose \
+	      src/echo_tree_experiment/Measurements/fisherPerformanceBigrams.csv \
+	      src/echo_tree_experiment/Resources/fisherConversations.db \
+	      2 \
+	      src/echo_tree_experiment/Resources/Fisher/fisherTestSentences_Tokens.txt
+
+     o Fisher measure trigrams:
+          src/echo_tree_experiment/Evaluation/echo_tree_eval.py --verbose \
+	      src/echo_tree_experiment/Measurements/fisherPerformanceTrigrams.csv \
+	      src/echo_tree_experiment/Resources/fisherConversations.db \
+	      3 \
+	      src/echo_tree_experiment/Resources/Fisher/fisherTestSentences_Tokens.txt
+
+     o DmozRecreation get 60 test sentences:
+          o As randomly as possible, pull some of the (rare) portions of coherent text from 
+	    DmozRecreation/dmozRecreationTestTextLinksGoneNoUnicode.txt
+          o On Linux cmd line: shuffle the sentences randomly, output to shuffledDmozRecreationSentences.txt:
+               shuf -o shuffledDmozRecreationSentences.txt testSentences.txt 
+          o In emacs, take first 60 sentences, and store in dmozRecreationTestSentences.txt
+
+     o DmozRecreation tokenize sample sentences:
+	  cd ~/fuerte/stacks/echo_tree_experiment/src/echo_tree_experiment/Resources/DmozRecreation
+          # At root of echo_tree_experiment:
+          src/echo_tree_experiment/Tokenization/tokenizeText.sh src/echo_tree_experiment/Resources/DmozRecreation/dmozRecreationTestSentences.txt
+
+     o DmozRecreation measure bigrams:
+          src/echo_tree_experiment/Evaluation/echo_tree_eval.py --verbose \
+	      src/echo_tree_experiment/Measurements/dmozRecreationPerformanceBigrams.csv \
+	      src/echo_tree_experiment/Resources/dmozRecreation.db \
+	      2 \
+	      src/echo_tree_experiment/Resources/DmozRecreation/dmozRecreationTestSentences_Tokens.txt
+
+     o DmozRecreation measure trigrams:
+          src/echo_tree_experiment/Evaluation/echo_tree_eval.py --verbose \
+	      src/echo_tree_experiment/Measurements/dmozRecreationPerformanceTrigrams.csv \
+	      src/echo_tree_experiment/Resources/dmozRecreation.db \
+	      3 \
+	      src/echo_tree_experiment/Resources/DmozRecreation/dmozRecreationTestSentences_Tokens.txt
+
+
+
+SQLite Queries
+--------------
+
+CREATE TABLE BiTrigrams
+       AS SELECT 
+       	     Bigrams.probability AS bigramProbability,
+	     Trigrams.probability AS trigramProbability, 
+	     Bigrams.word1 AS word1, 
+	     Bigrams.word2 AS bigramWord2, 
+	     Trigrams.word2 AS trigramWord2,
+	     Trigrams.word3 AS trigramWord3 
+          FROM Bigrams,Trigrams
+          WHERE Bigrams.word1=Trigrams.word1;
+
+SELECT word1,bigramWord2,trigramWord2,trigramWord3 FROM BiTrigrams WHERE word1="cozy"
+       ORDER BY bigramProbability DESC, trigramProbability DECs;
+
+SELECT word1, word2  FROM  Bigrams 
+       WHERE word1="reliability"
+       ORDER BY probability DESC;
+       
+SELECT word1, word2, word3  FROM  Trigrams 
+       WHERE word1="reliability"
+       ORDER BY probability DESC;
+       
+SELECT word1, word2, word3  FROM  Trigrams 
+       WHERE word1="jack"
+       ORDER BY probability DESC;    
+       
+SELECT word1, word2 FROM  Bigrams 
+       WHERE word1="jack"
+       ORDER BY probability DESC;   
+       
+SELECT word1, word2, word3  FROM  Trigrams 
+       WHERE word1="and"
+       ORDER BY probability DESC;
+
+SELECT word1, word2  FROM  Bigrams 
+       WHERE word1="and"
+       ORDER BY probability DESC;
+       
+SELECT word1, word2 FROM  Bigrams 
+       WHERE word1="in"
+       ORDER BY probability DESC;     
+       
+SELECT word1, word2 FROM  Bigrams 
+       WHERE word1="of"
+       ORDER BY probability DESC; 
+       
+SELECT word1, word2 FROM  Bigrams 
+       WHERE word1="no"
+       ORDER BY probability DESC;
+       
+SELECT word1, word2 FROM  Bigrams 
+       WHERE word1="formatted"
+       ORDER BY probability DESC;           
+
+SELECT T1.word1, T1.word2, T2.word2 FROM 
+       (SELECT word1,word2
+       	FROM Bigrams
+	    WHERE word1="reliability"
+	    ORDER BY probability DESC) T1
+	 LEFT JOIN 
+	   (SELECT word1, word2
+	    FROM Bigrams
+	    ORDER BY probability DESC) T2 ON T2.word1=T1.word2;
+
+SELECT word1, word2, word3  FROM  Trigrams 
+       WHERE word1="reliability"
+       ORDER BY probability DESC;
+
+Temp notes
+----------
+# Test for dmoz pages:
+   zcat WEB-20121213212021275-00029-23301~mono.stanford.edu~8443.warc.gz | grep --perl-regex -i "warc-target-uri: .*(?=dmoz)"
+
+
+a,slow,{(a,slow,)}
+a,soft,{(a,soft,)}
+a,spot,{(a,spot,)}
+a,step,{(a,step,)}
+a,team,{(a,team,),(a,team,),(a,team,),(a,team,)}
+a,test,{(a,test,)}
+a,text,{(a,text,)}
+a,time,{(a,time,),(a,time,)}
+a,trip,{(a,trip,)}
+a,true,{(a,true,)}
+a,type,{(a,type,)}
+a,very,{(a,very,),(a,very,),(a,very,),(a,very,),(a,very,)}
+a,view,{(a,view,)}
+a,wall,{(a,wall,)}
+a,week,{(a,week,),(a,week,),(a,week,)}
+a,wide,{(a,wide,),(a,wide,),(a,wide,),(a,wide,)}
+a,year,{(a,year,),(a,year,),(a,year,)}
+add,an,{(add,an,)}
+
+------
+
+OrderedDict([('word', 'reliability'), 
+             ('followWordObjs', [OrderedDict([
+	        ('word', 'and'), 
+		('followWordObjs', [OrderedDict([
+		   ('word', 'formatted'), 
+		   ('followWordObjs', [])]), 
+OrderedDict([('word', formatted'), 
+             ('followWordObjs', [])]), 
+OrderedDict([('word', 'formatted'), 
+	     ('followWordObjs', [])]), 
+OrderedDict([('word', u'formatted'), 
+             ('followWordObjs', [])]), 
+OrderedDict([('word', u'formatted'), ('followWordObjs', [])])])]), OrderedDict([('word', u'and'), ('followWordObjs', [OrderedDict([('word', u'formatted'), ('followWordObjs', [])]), OrderedDict([('word', u'formatted'), ('followWordObjs', [])]), OrderedDict([('word', u'formatted'), ('followWordObjs', [])]), OrderedDict([('word', u'formatted'), ('followWordObjs', [])]), OrderedDict([('word', u'formatted'), ('followWordObjs', [])])])]), OrderedDict([('word', u'and'), ('followWordObjs', [OrderedDict([('word', u'formatted'), ('followWordObjs', [])]), OrderedDict([('word', u'formatted'), ('followWordObjs', [])]), OrderedDict([('word', u'formatted'), ('followWordObjs', [])]), OrderedDict([('word', u'formatted'), ('followWordObjs', [])]), OrderedDict([('word', u'formatted'), ('followWordObjs', [])])])]), OrderedDict([('word', u'and'), ('followWordObjs', [OrderedDict([('word', u'formatted'), ('followWordObjs', [])]), OrderedDict([('word', u'formatted'), ('followWordObjs', [])]), OrderedDict([('word', u'formatted'), ('followWordObjs', [])]), OrderedDict([('word', u'formatted'), ('followWordObjs', [])]), OrderedDict([('word', u'formatted'), ('followWordObjs', [])])])]), OrderedDict([('word', u'and'), ('followWordObjs', [OrderedDict([('word', u'formatted'), ('followWordObjs', [])]), OrderedDict([('word', u'formatted'), ('followWordObjs', [])]), OrderedDict([('word', u'formatted'), ('followWordObjs', [])]), OrderedDict([('word', u'formatted'), ('followWordObjs', [])]), OrderedDict([('word', u'formatted'), ('followWordObjs', [])])])])])])
+
+
+------
+
+Timing: 
+   - 1.8MB warc file with 100 pages on new cluster in mapreduce mode: ~4 minutes
+     Result: 464,493 bytes of ngram CSV file
+             31485 distinct ngrams
+   - Submitting a directory containing two copies of this same warc file:
+             464,743 bytes of ngram CSV file
+             31485 distinct ngrams
+   - DmozHealth:
+         - 65GB (65,132,998,221) compressed
+	      About 66*21GB ~= 1.4TB
+	 - 66 warc.gz files
+
+	 - ngrams duration for one ~100MB file:
+	     Launched At: 16-Jan-2013 16:19:38 (0sec)
+	     Finished At: 16-Jan-2013 16:34:08 (14mins, 29sec)
+	     Successfully read 229245 records (929973077 bytes) 
+	          from: "hdfs://iln29.stanford.edu:9000/user/paepcke/Datasets/DmozHealth"
+         - ngrams duration for all 61 ~100MB files:
+           Job http://iln29.stanford.edu:50030/jobdetails.jsp?jobid=job_201301211037_0008
+	       Started at: Tue Jan 22 14:38:04 PST 2013
+	       Finished at: Tue Jan 22 14:58:08 PST 2013
+	       Finished in: 20mins, 3sec
+	       Counters:
+	       Total records written : 43387147
+	       Total bytes written : 523863125
+	       Spillable Memory Manager spill count : 0
+	       Total bags proactively spilled: 0
+	       Total records proactively spilled: 0
+
+
+
+
+
+   - Tried 25 GB with 1 task per cpu: child error. Maybe IO error
+   - Also
+	java.lang.Throwable: Child Error
+		at org.apache.hadoop.mapred.TaskRunner.run(TaskRunner.java:271)
+	Caused by: java.io.IOException: Task process exit with nonzero status of 137.
+		at org.apache.hadoop.mapred.TaskRunner.run(TaskRunner.java:258)
+
+
+Literature
+----------
+
+Smoothing: "Estimation of Probabilities from Sparse Data
+for the Language Model Component of a Speech Recognizer", Slava
+M. Katz, in "IEEE Transactions on Acoustics, Speech and Signal
+Processing", volume ASSP-35, pages 400-401, March 1987.
+
+Scratch
+-------
+SELECT word,follower,probability FROM NgramProbs WHERE word="reliability" ORDER BY probability DESC LIMIT 10;
+
+SELECT * FROM NgramProbs GROUP BY word 
+
+
+ pigrun -x $EXEC_MODE \
++       -Dpig.temp.dir=/tmp \
+        DEST=${DEST_DIR}.gz \
+        WARC_FILE=$WARC_NAME \
+        PERCENTAGE=$PERCENTAGE \
+
+SELECT * FROM NgramProbs AS t1 JOIN NgramProbs AS t2 ON t1.word=t2.word;
+SELECT * FROM NgramProbs AS t1 JOIN NgramProbs AS t2 ON t1.word=t2.word ORDER BY probability DESC;
+---SELECT * FROM NgramProbs AS t1 JOIN NgramProbs AS t2 ON t1.word=t2.word ORDER BY probability DESC LIMIT 2;
+
+SELECT * FROM NgramProbs AS t1 INNER JOIN (SELECT MAX(probability) FROM NgramProbs GROUP BY word);
+SELECT maxProb FROM NgramProbs AS t1 INNER JOIN (SELECT MAX(probability) as maxProb FROM NgramProbs GROUP BY word);
+SELECT maxProb FROM NgramProbs AS t1 INNER JOIN (SELECT MAX(probability) as maxProb FROM NgramProbs GROUP BY word)
+       WHERE t1.probability=maxProb;
+
+SELECT word,follower,probability FROM NgramProbs AS t1 INNER JOIN 
+       (SELECT MAX(probability) as maxProb FROM NgramProbs GROUP BY word)
+       WHERE t1.probability=maxProb;
+
+# Almost works for top1:
+SELECT t1.word,follower,probability FROM NgramProbs AS t1 INNER JOIN 
+       (SELECT word, MAX(probability) as maxProb FROM NgramProbs AS t2 GROUP BY t2.word)
+       WHERE t1.word=t2.word;
+
+# Fails
+SELECT t1.word,follower,probability FROM NgramProbs AS t1 INNER JOIN
+       (SELECT t2.word FROM NgramProbs AS t2 GROUP BY t2.word ORDER BY probability DESC)
+       WHERE t1.word=t2.word;
+
+SELECT t1.word,follower,probability FROM NgramProbs AS t1 LEFT OUTER JOIN
+       (SELECT t2.word probability FROM NgramProbs AS t2 GROUP BY t2.word ORDER BY probability DESC LIMIT 2);
+
+SELECT word, probability FROM NgramProbs ORDER BY probability DESC LIMIT 2;
+
+(six,seven,2,2,0)
+(fourteen,fifteen,2,2,0)
+(one,two,3,3,0)
+(three,four,3,3,0)
+(eight,nine,3,3,0)
+(ten,eleven,3,3,0)
+(twelve,thirteen,3,3,0)
+
+(six,seven,0.056)
+(fourteen,fifteen,0.056)
+(one,two,0.1234)
+(three,four,0.1234)
+(eight,nine,0.1234)
+(ten,eleven,0.1234)
+(twelve,thirteen,0.1234)
+(,,)
+
+(six,seven,0.056)
+(fourteen,fifteen,0.056)
+(one,two,0.1234)
+(three,four,0.1234)
+(eight,nine,0.1234)
+(ten,eleven,0.1234)
+(twelve,thirteen,0.1234)
+(,,)
+
+(six,seven,2,2,0.056)
+(fourteen,fifteen,2,2,0.056)
+(one,two,3,3,0.1234)
+(three,four,3,3,0.1234)
+(eight,nine,3,3,0.1234)
+(ten,eleven,3,3,0.1234)
+(twelve,thirteen,3,3,0.1234)
+(,,,,)
+(six,seven,0.056)
+(fourteen,fifteen,0.056)
+(one,two,0.1234)
+(three,four,0.1234)
+(eight,nine,0.1234)
+(ten,eleven,0.1234)
+(twelve,thirteen,0.1234)
+(,,)
+
+(,,,1,2.4E-5)
+(six,seven,2,2,0.056)
+(fourteen,fifteen,2,2,0.056)
+(one,two,3,3,0.1234)
+(three,four,3,3,0.1234)
+(eight,nine,3,3,0.1234)
+(ten,eleven,3,3,0.1234)
+(twelve,thirteen,3,3,0.1234)
+(,,,,)
+(,,2.4E-5)
+(six,seven,0.056)
+(fourteen,fifteen,0.056)
+(one,two,0.1234)
+(three,four,0.1234)
+(eight,nine,0.1234)
+(ten,eleven,0.1234)
+(twelve,thirteen,0.1234)
+(,,)
+
+(one,brown,1,1,2.4E-5)
+(six,seven,2,2,0.056)
+(six,apples,2,2,0.056)
+(fourteen,fifteen,2,2,0.056)
+(one,blue,2,2,0.056)
+(one,two,3,3,0.1234)
+(one,red,3,3,0.1234)
+(one,yellow,3,3,0.1234)
+(three,four,3,3,0.1234)
+(six,pairs,3,3,0.1234)
+(eight,nine,3,3,0.1234)
+(ten,eleven,3,3,0.1234)
+(twelve,thirteen,3,3,0.1234)
+-------------------------
+goodTuringRaw.csv:
+
+1,0.000024
+2,0.056
+3,0.1234
+
+Ngrams:
+one,two,3
+one,blue,2
+one,red,3
+one,yellow,3
+one,brown,1
+three,four,3
+six,seven,2
+six,apples,2
+six,pairs,3
+eight,nine,3
+ten,eleven,3
+twelve,thirteen,3
+fourteen,fifteen,2
+
+A = LOAD 'test.tsv' as (first: chararray, second: chararray); 
+B = GROUP A BY (first, second); 
+C = FOREACH B generate FLATTEN(group), COUNT(*) as count; 
+D = GROUP C BY first; // again group by first 
+topResults = FOREACH D { 
+	   result = Top(10, 2, C); // and retain top 10 occurrences of
+	                           // 'second' in first 
+           GENERATE FLATTEN(result);
+           } 
+
+result $LIMIT == -1 ? $0 : Top(...)
+-----------

@@ -1,0 +1,346 @@
+CHI 2013 Papers and Notes (Refereed)
+
+Reviews of submission #1741: "EchoTree: Engaged Conversation when
+Capabilities are Limited"
+
+------------------------ Submission 1741, Review 5 ------------------------
+
+Reviewer:           primary
+
+Your Assessment of this Paper's Contribution to HCI
+
+
+Overall Rating
+
+   3.0 - Neutral: Overall I would not argue for accepting or rejecting this paper. 
+
+Review
+
+
+Expertise
+
+   
+
+The Meta-Review
+
+   This meta review is based on the three reviews provided for this
+   submission and the long discussion carried out between the reviewers on
+   differences in their reviews. 
+
+   This note is about an assistive visualization tool that could improve the
+   communication production (textual and spoken) of impaired users, through
+   the use of a tree-based navigation of word suggestions. This can also be
+   used to create an online game of storytelling.
+
+   All reviewers agree that this note should be rated as between possibly
+   reject and neutral for several reasons. The idea is interesting, but it
+   is not entirely novel with respect of the authors' claim that
+   interlocutors have a hard time deciding if the other person is still
+   typing or has gone silent (R1). R1 expects authors to elaborate the
+   feature of "helping" users with word selections. It is a distraction to
+   focus on the architecture and implementation of the system (R1). The note
+   is promising and could be developed from its work-in-progress-stage to a
+   more finished note or paper (R1). R2 loves the subject and finds the
+   presented technique clever and effective as well as the innovation
+   clever. Though R2 wants to know more about its interface and the
+   consideration of human factor in the HCI of the system. R3, on the other
+   hand, is disappointed because the note does not deliver what it promises.
+   A rigorous user study is needed to prove the concept and evaluate the
+   system (R3). R4 finds a lot of things to improve in the note: the format,
+   the presentation, the structure, the description of the UI, the analysis
+   and discussion, the justification of the choice of ENRON Corpus, the
+   impact of the system on the conversation. 
+
+   All reviewers suggest several points for improvement in their reviews. I
+   will suggest that authors should consider these remarks and state in
+   their rebuttal how they feel about modifying their note according to
+   these suggestions and whether they are ready to adapt the note in that
+   direction as implicated in this review.
+
+Associate Chairs Additional Comments 
+
+
+The Review
+
+
+Areas for Improvement
+
+
+
+------------------------ Submission 1741, Review 1 ------------------------
+
+Reviewer:           external
+
+Your Assessment of this Paper's Contribution to HCI
+
+   This paper presents an assistive visualization tool that could improve
+   the communication production (textual and spoken) of impaired users,
+   through the use of a tree-based navigation of word suggestions. A novel
+   feature of this system is the ability of interlocutors to "help" impaired
+   users with the word choices by anticipating word paths in the sentences
+   that are being constructed.
+
+Overall Rating
+
+   2.5 . . . Between possibly reject and neutral 
+
+Review
+
+   The authors present an interesting idea, that of an assistive
+   visualization tool that could improve the communication between impaired
+   users and others. While there are several word prediction systems that
+   help users select the next word when composing sentences, the presented
+   system allows both its users and their interlocutors to make that
+   selection. 
+
+   The system is not entirely novel with respect ot the authors' claim that
+   interlocutors have a hard time deciding if the other person is still
+   typing or has gone silent -- the early generation of chat clients allowed
+   users to see the interlocutor typing character-by-character. Perhaps the
+   authors could have included these for a comparison. Also, there are
+   several word prediction systems (some mentioned in the lit review, which
+   is strangely included only at the end of the paper). So the main novelty
+   that I found is the fact that interlocutors can "help" users with word
+   selections. Unfortunately, the authors seems to avoid elaborating or
+   emphasizing this feature, which was rather disappointing.
+
+   The authors focus significantly on the architecture and implementation of
+   the system, which in my view distracts from the main point of the paper,
+   that of allowing better conversations for differently-abled users. And
+   unfortunately, it seems that some aspects of the implementation led to a
+   somewhat unsatisfactory evaluation, such as:
+    - the choice of the training corpus,
+    - the display of only a limited part of the search tree, and
+    - the rigid prediction mechanism without human override capabilities or
+   a human-in-the-loop approach (e.g. a fall-back mechanism that would allow
+   users to easily select words not suggested by the prediction engine).
+   As a consequence of these, I found the results presented at the end to be
+   quite predictable.
+
+   I think this work is promising, but I can't fully recommend it being
+   accepted at CHI due to its work-in-progress feel. However, I would
+   encourage the authors to continue their work and focus more on the
+   conversation / collaborative aspects of their system.
+
+Expertise
+
+   4  (Expert )
+
+Areas for Improvement
+
+   Beside addressing the main points of this review, there are several other
+   aspects that could make this paper a much stronger candidate:
+    - It is not clear if the system was tested with only one user or more.
+    - The story-telling game used as evaluation is not clearly described,
+   and I had a hard time understanding how the evaluation was conducted
+   using this game. One of the important details is who were the subjects
+   used in the evaluation.
+    - It is not clear how is the refresh for when trees are redrawn, and if
+   the refresh has any affect on user experience.
+    - The choice of highlighting words in the trees by changing their colour
+   to blue seems less accessible than other options.
+    - It is not clear if the system allows some form of "backspace"
+   functionality, such as deleting only one word instead of "starting over"
+    - The experiment was focused on measuring conversation acceleration
+   through word prediction, although in my view the more interesting aspect
+   would have been to determine how useful the exposure of "intent" was, and
+   particularly how it affected the engagement of interlocutors.
+
+
+------------------------ Submission 1741, Review 2 ------------------------
+
+Reviewer:           external
+
+Your Assessment of this Paper's Contribution to HCI
+
+   The paper describes a new and unique method for aiding severely motor and
+   speech disabled individuals in communicating with others.  It does so by
+   creating a tree of potential words that the speaker might mean that are
+   shared with the listener.  The listener can interact with this tree
+   suggesting the intended word.  The suggested words are those with the
+   highest frequency of being following words.  
+
+   The paper, thus, contributes to the field of Human Computer Interaction
+   by suggesting a new computer-supported technique that helps a disabled
+   individual communicate more quickly.  The authors also describe the
+   possibility of using their technique to create an online game of
+   storytelling.
+
+Overall Rating
+
+   3.0 - Neutral: Overall I would not argue for accepting or rejecting this paper. 
+
+Review
+
+   The paper presents a clever and effective technique for speeding up
+   conversation for motor and speech disabled individuals.  It might prove
+   to be quite useful  However, the paper only describes the technique and
+   evaluates how well it works against a corpus of data collected from an
+   email source.  What we don't know about the interface is:
+
+   1. How easy it will be for hypothetical Henry to use.
+   2. What "Henry" thinks of the interface.
+   3. How potential communicators react to the interface and to
+   communicating with "Henry" via this mechanism.
+   4. How easy it will be for random communicators to walk up and use the
+   system.
+   5. How fast and readily a conversation will flow via the Echotree
+   interface.
+
+   The innovation is clever, but the authors have left out the "human" part
+   of human-computer interaction.  They have neither observed a typical
+   "Henry" communicating with existing technology nor collected any data
+   from users on the viability of the innovation.  That said, this reviewer
+   rated this paper high based on the quality and creativity of the idea. 
+   Rather than being just designed for "Henry,"  it is suggested that the
+   designers of Echotree look to developing it for individuals with aphasia.
+    This is a much larger group of afflicted people. The recognition memory
+   of suggested words / pictures might help them communicate much more
+   effectively.  Current pictionary based reference systems are too
+   cumbersome and rarely used by this group of people.
+
+   There are typos and some ambiguities in the text that could use fixing.
+   Words that can be searched for and fixed in the document are:
+
+   (1) pysically 
+   (2) i.e. selected - needs a comma after i.e.
+   (3)The inspiration might for example - for example needs commas before
+   and after
+   (4)Brower 3
+   (5)4.2$ - should be 4.2 %
+   (6)conversational intention - conversational intent
+   (7)literal - should be actual (found in two places)
+   (8)accessible to - usable by both
+
+   Other composition issues in the paper are:
+
+   (1) The term affordances is misused.  The authors can look up its true
+   meaning.  In the meantime, replacing "interaction affordances" with
+   "interactivity" will solve the problem.
+
+   (2) This reviewer has no idea what "Inexpensive USB based options are
+   available refers to."  It probably does not need to be mentioned.
+
+   (3) The phrase "Coloration shows the contribution of out-OfSeq to the
+   overall result."  needs to be rewritten so that it is not so hard to
+   parse by the reader.  
+
+
+Expertise
+
+   4  (Expert )
+
+Areas for Improvement
+
+   The key element that could be improved in the paper's presentation is
+   item 1: statements or passages need to be expressed more clearly.
+
+
+------------------------ Submission 1741, Review 3 ------------------------
+
+Reviewer:           external
+
+Your Assessment of this Paper's Contribution to HCI
+
+   EchoTree presents a communication system for speech and dexterity
+   impaired individuals that works on two fronts. First, it uses word
+   prediction through bi-word distribution from large text corpora. Second,
+   it engages the inter-communicator in the prediction process, allowing the
+   other person to suggest options based on intuition of where the message
+   is going. The paper does not present a rigorous validation of the design.
+
+Overall Rating
+
+   2.0 - Possibly Reject: The submission is weak and probably shouldn't be accepted, but there is some chance it should get in. 
+
+Review
+
+   EchoTree presents an interesting premise, but fails to deliver. The
+   premise is a mixed-initiative computing system that helps individuals
+   with speech and motor dexterity problems to communicate with
+   able-individuals. The core of the system is a mixed-initiative,
+   multi-user rapid prediction system based on human intuition,
+   communication principles, and from statistical analysis of bi-word
+   engrams in large text corpora. It sound very promising. On the other
+   hand, I did not find evidence of the validity of this approach through a
+   rigorous user study. At this point, I consider it a very promising idea
+   that needs significant validation through evaluation.
+
+Expertise
+
+   3  (Knowledgeable)
+
+Areas for Improvement
+
+   Please, validate claims of usability through rigorous user studies, even
+   if the number of participants is low. For this task, please combine
+   quantitative and qualitative analysis. The work is very promising, but
+   requires validates.
+
+
+------------------------ Submission 1741, Review 4 ------------------------
+
+Reviewer:           external
+
+Your Assessment of this Paper's Contribution to HCI
+
+   The paper describes an innovative method for speeding up communication
+   where motor and/or speech impaired people are involved. The main
+   innovation appears to be the use of word-trees which are not only to be
+   used by the disabled person him/herself but also by the conversation
+   parters who will be able to monitor the direction the conversation takes
+   and are thus enabled to speed-up by intelligent guesses.
+
+Overall Rating
+
+   3.5 . . . Between neutral and possibly accept 
+
+Review
+
+   The paper is well written and communicates the idea in a proper way.
+   Improvements, however, should be done in the following ways:
+
+   (The score is given provided that the suggested improvements will be
+   done)
+
+   a) Screenshot diagrams are not legible, too small font used. Enlarge the
+   images or show just a part of it.
+
+   b) The state-of-the-art in increasing communication speed for disabled
+   persons is given very late in the paper and without sufficient depth.
+   Benchmarks for text-prediction, word-prediction, scanning optimising, use
+   of phrase catalogues or Semantic Compaction (Word Strategy) is missing.
+   So, the benefits of the new approach by using Echo-Trees are not shown.
+
+   c) As HCI and thus the user interface is topic of the conference the
+   design of the interface should be planned and described more carefully.
+   The use of tiny radio buttons or relatively long selection lists on the
+   screen will not easily be accessible fpr people using a head-pointer or
+   those relying on a scanning (single switch) input method. This should be
+   discussed in be improved.
+
+   d) The benefits of the method is described in correctly predicted next
+   words (or words which could follow later in the sentence). The gain in
+   time in not analysed and discussed. It is well known, that more or less
+   all prediction methods include some factor where part of the time gain is
+   lost.
+
+   e) The use of the ENRON Corpus for general every-day conversation is
+   doubtful. What is the justification for this choice?
+
+   f) High level word prediction has the disadvantage that the disabled
+   person is nudged to use suggested words even if they are not the first
+   choice. This will bring an unfavourable bias into the conversation which
+   could (if the system is not adaptive or self-learning in itself) lead to
+   an adaptation of the user to the system.
+
+Expertise
+
+   4  (Expert )
+
+Areas for Improvement
+
+   see above
+
+
+
