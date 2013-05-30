@@ -15,7 +15,8 @@
 \usepackage{gensymb}
 \usepackage{multirow}
 \usepackage{color}
-
+\usepackage{algorithmic}     % For algorithm pseudocode
+\usepackage{multirow}
 %\usepackage{caption}
 %\usepackage{subcaption}
 
@@ -184,12 +185,10 @@ possibilities, which the impaired person can confirm or
 dismiss. Correct guesses accelerate conversational progress. EchoTrees
 are browser based and interactive. Multiple parties may view, and
 interact with the same stream of EchoTrees from desktops, tablets, or
-smartphones. The application may also be used for collaborative,
-geographically remote story telling games, whose participants may, or
-may not be pysically impaired. We describe our implementation, and
-provide preliminary measurements of how effectively EchoTrees predict
-conversation flow for one particular underlying set of text
-materials. 
+smartphones. We describe our implementation, and results of an
+experiment we undertook to identify optimal types of data sources for
+ngram extraction.
+
   \end{abstract}
 
 \keywords{assistive technology; prolonged engagement; collaborative conversation; story telling, game}
@@ -350,6 +349,20 @@ the {\em Not That} button can serve as a negative response.
 \subsection{Architecture}
 
 %***** Cover Good-Turing
+%***** Cover ngrams:
+For example:
+
+\hspace{1 cm}1.294000e-05,circumstances,like
+\hspace{1 cm}1.294000e-05,He,just
+\hspace{1 cm}1.050000e-04,while,I
+\hspace{1 cm}1.294000e-05,caused,when
+\hspace{1 cm}1.294000e-05,not,He
+
+
+Each entry in these lists contains a probability. The first line
+above means `there is a 1.294000e-05 probability that the word {\em
+  like} follows in a sentence, if the current sentence word is {\em
+  circumstances}. 
 Figure~\ref{fig:arch} shows how the EchoTree system is
 constructed. 
 \begin{figure}
@@ -487,7 +500,7 @@ follows another in one's entire personal corpus should not necessarily
 be open to public view.
 
 At the other extreme, we can use a broad source, like Google's
-terabyte ngram collection \cite{****}. Its coverage across millions of
+terabyte ngram collection \cite{google1T}. Its coverage across millions of
 Web pages is more or less topic neutral, and thereby maybe universally
 applicable. Between these extremes lies the option of utilizing
 multiple ngram sets, each from one topic specific collection of Web
@@ -526,7 +539,22 @@ at the second tree level, one half point was awarded to the
 sentence. The reliability measure for $S$ was computed as the sum of
 awarded points, normalized to the length of the sentence. The data
 source's single reliability performance measure is the average of the
-individual sentence performances.
+individual sentence performances. More formally:
+
+\begin{algorithmic}
+  \FORALL{sentence $S$ in test sentences}
+     \FORALL{word $w_i$ in $S$}
+        \STATE tree = computeEchoTree($w_i$);
+        \IF{$w_{i+1}$ in first level of tree}
+            \STATE $score_s += 1$;
+        \ELSIF{$w_{i+1}$ in second level of tree}
+            \STATE $score_s += 0.5$;
+        \ENDIF
+     \ENDFOR
+     \STATE normalize $score$ by length($S$);
+  \ENDFOR
+  \STATE $reliability = \sum_s score_s / numSentences$;
+\end{algorithmic}            
 
 The second performance measure estimates the {\em savings} in
 typing. This measure is the percentage of characters that would not
@@ -541,13 +569,13 @@ approximation, because of the above mentioned issue of distraction.
 
 The first data source, {\em REC} consists of 10M Web pages we
 retrieved from the {\em Recreation} section of the Open Directory
-Project (ODP) \cite{****dmoz***}. The project used human input to
-categorized Web pages. We eliminated all pages that stemmed from the
-ODP site itself, retaining pages from the Recreation target sites one
-level deep. We removed all HTML and Javascript from the resulting
-pages, then tokenized the remainder using the Stanford NLP Tokenizer
-\cite{****Stanford tokenizer}. We then extracted 5,055,284 bigrams,
-and 28,423,891 trigrams.
+Project (ODP) \cite{dmoz}. The project used human input to categorized
+Web pages. We eliminated all pages that stemmed from the ODP site
+itself, retaining pages from the Recreation target sites one level
+deep. We removed all HTML and Javascript from the resulting pages,
+then tokenized the remainder using the Stanford NLP Tokenizer
+\cite{tokenizer}. We then extracted 5,055,284 bigrams, and 28,423,891
+trigrams.
 
 Our second data source is the Fisher collection's transcripts of
 11,000 ten-minute telephone conversations {\em FISH}. Each
@@ -561,103 +589,262 @@ Our third experiment data source, finally is a blog Henry maintains
 {\em BLOG}. The snapshot was taken on May 10, 2013, and comprises
 1,167 sentences (96.5MB), 12,222 bigrams, and 16,567 trigrams.
 
-In all cases, after removing HTML tags, but before extracting ngrams,
-we set aside a portion of each corpus for testing. We used a 10\%
-set-aside for REC and FISH, and 5\% for BLOG.
+\subsection{Test Procedure}
 
+For the recreation Web source (REC), we removed HTML markup before
+further processing. Before extracting ngrams, from data source
+content, we set aside a portion of the corpus as a source for test
+sentences. We used a 10\% set-aside for REC and FISH, and 5\% for
+BLOG.
+
+%****** Refer back to architecture section:
 We computed ngram probabilities using the Good-Turing algorithm
-\cite{***good-turing***}. This treatment smoothes the otherwise spikey
-ngram distribution, and sets aside some probability mass for ngrams
-not encountered in the underlying collection.
+\cite{Gale95good-turingsmoothing}. This treatment smoothes the
+otherwise spikey ngram distribution, and sets aside some probability
+mass for ngrams not encountered in the underlying collection.
+
+The end result were six lists. Each of the three data sources induced
+one list of bigrams, and another list of trigrams. 
+
+We randomly selected 60 sentences from each of the corpus set-asides.
+We explain the further procedure using one of the six experimental
+conditions: bigrams from the Fisher collection of conversations.
+
+The test software tokenized each of the 60 sentences that were set
+aside from the Fisher collection before generating its bigrams. Using
+the Fisher bigram list, word trees were computed repeatedly as
+described in the Performance Measures section. The trees were not
+displayed; only their internal representations were used for the
+computations. This procedure produced a {\em csv} file with one line
+for each sentence recording the two performance scores: The savings in
+typing and the reliability in predicting follow-on words.
 
 \section{Results}
 
-As the experiment featured a 2x3 design we used an ANOVA for each of
-the two performance measures (reliability and savings). Each ANOVA
-compared one performance measure among the six combinations of three
-data sources and two ngram arities.
+We used a oneway ANOVA to evaluate the differences among mean typing
+savings (first outcome variable), and among reliability measure means
+(second outcome variable) for the six experimental conditions, i.e.
+the six combinations of three data sources and two ngram arities.
 
-- Not equal variance, but equal group sizes: 60 sentences for each
+Levene's test found variances among the six groups to be different.
+We nevertheless opted for the ANOVA procedure, because our sample
+sizes were all equal with 60 sentences.
 
-%shown in Table~\ref{tab:conditions}.
-%###################################
-%% \begin{table}{\scriptsize
-%%     \begin{tabular}{|r|c|c|}
-%%          % \T and \B would not work if it is placed here (needs to go inside cell)
-%%         \hline
-%%         ~                & {\bf Enron Collection} \T \B & {\graytext\bf Google Bigrams} \\ \hline
-%%         {\bf Non-Enron} \T & ~    & ~  {\graytext\em Planned}     \\ 
-%%         {\bf Enron EmpX} \B & ~   & ~  {\graytext\em Planned}     \\
-%%         \hline
-%%     \end{tabular}
-%%     }
-%%     \caption{Experiment matching utterance originators with
-%%       word prediction source(s). Gray entry shows future work, and
-%%       exemplifies how suitability of additional collections will be evaluated.}
-%%     \label{tab:conditions}
-%% \end{table}
-%###################################
+We found a significant effect of the data source on savings in typing,
+$F(5,354)=16.0$, $p<.001$. The effect of data source on prediction
+reliability was also significant, $F(5,354)=25.4$, $p<.001$.
 
+Tukey HSD post-hoc tests revealed a number of significant between group
+differences. See Table~\ref{tab:savings} and Table~\ref{tab:reliability}.
+
+Figure~\ref{fig:savings} shows a comparison of mean savings in
+keyboarding effort.
+
+Figure~\ref{fig:reliability} displays the corresponding results for
+prediction reliability.
+
+% Temporarily make math mode smaller for the material in the following
+% tables:
+\begingroup
+\everymath{\scriptstyle}
+\tiny
+
+\begin{table*}
+    \centering
+    \begin{tabular}{|r|c|c|c|c|c|c|}
+    \hline
+    ~ & $Personal_{bi}$ & $Personal_{tri}$ & $Speech_{bi}$ & $Speech_{tri}$ & $Web_{bi}$ & $Web_{tri}$ \\
+    ~ & $M=14.0$ & $M=12.1$ & $M=6.6$  & $M=10.1$ & $M=4.0$  & $M=11.3$ \\ 
+    ~ & $SD=9.8$ & $SD=8.4$ & $SD=7.5$ & $SD=8.0$ & $SD=3.5$ & $SD=5.3$ \\ \hline
+    $Personal_{bi};M=14.0,SD=9.8$  & ~                                            & ~                                             & $p<.001$                                  & $p<.045$                                    & $p<.001$                               & ~                                        \\ \hline
+    $Personal_{tri};M=12.1,SD=8.4$ & ~                                            & ~                                             & $p<.05$                                   & ~                                           & $p<.001$                               & ~                                        \\ \hline
+    $Speech_{bi};M=6.6,SD=7.5$     & $p<.001$                                     & $p<.05$                                       & ~                                         & ~                                           & ~                                      & $p<.05$                                  \\ \hline
+    $Speech_{tri};M=10.1,SD=8.0$   & $p<.05$                                      & ~                                             & ~                                         & ~                                           & $p<.001$                               & ~                                        \\ \hline
+    $Web_{bi};M=4.0,SD=3.5$        & $p<.001$                                     & $p<.001$                                      & ~                                         & $p<.001$                                    & ~                                      & $p<.001$                                 \\ \hline
+    $Web_{tri};M=11.3,SD=5.3$      & ~                                            & ~                                             & $p<.05$                                   & ~                                           & $p<.001$                               & ~                                        \\ \hline
+    \end{tabular}
+    \caption {Post-hoc test results for savings in typing.}
+    \label{tab:savings}
+\end{table*}
+
+\begin{table*}
+    \centering
+    \begin{tabular}{|r|c|c|c|c|c|c|}
+    \hline
+    ~ & $Personal_{bi}$ & $Personal_{tri}$ & $Speech_{bi}$ & $Speech_{tri}$ & $Web_{bi}$ & $Web_{tri}$ \\
+    ~ & $M=.237$ & $M=.190$ & $M=.085$ & $M=.010$ & $M=.053$ & $M=.172$ \\
+    ~ & $SD=.145$ & $SD=.119$ & $SD=.143$ & $SD=.091$ & $SD=.052$ & $SD=.082$ \\ \hline
+    personal bi $M=.237,SD=.145$  & ~           & ~            & $p<.001$  & $p<.001$   & $p<.001$ & $p<.05$  \\ \hline
+    personal tri $M=.190,SD=.119$ & ~           & ~            & $p<.001$  & $p<.001$   & $p<.001$ & ~        \\ \hline
+    speech bi $M=.085,SD=.143$    & $p<.001$    & $p<.001$     & ~         & ~          & ~        & $p<.001$ \\ \hline
+    speech tri $M=.010,SD=.091$   & $p<.001$    & $p<.001$     & ~         & ~          & ~        & $p<.05$  \\ \hline
+    web bi $M=.053,SD=.052$       & $p<.001$    & $p<.001$     & ~         & ~          & ~        & $p<.001$ \\ \hline
+    web tri $M=.172,SD=.082$       & $p<.05$     & ~            & $p<.001$  & $p<.05$    & $p<.001$ & ~        \\ \hline
+    \end{tabular}
+    \caption {Post-hoc test results for prediction reliability.}
+    \label{tab:reliability}
+\end{table*}
+
+\endgroup
+
+\begin{figure}
+   \centering
+   \includegraphics[width=\columnwidth]{Figs/typingSavingsChart.pdf}
+   \caption{Mean savings in typing. No neighboring differences are
+     significant ({\em ns})}
+   \label{fig:savings}
+\end{figure}
+
+\begin{figure}
+   \centering
+   \includegraphics[width=\columnwidth]{Figs/meanPrediction.pdf}
+   \caption{Mean prediction reliability. No neighboring differences are
+     significant ({\em ns})}
+   \label{fig:reliability}
+\end{figure}
 
 \section{Discussion}
-The Enron collection is very biased towards the energy business, and
-is thus suboptimal as a source for prediction in unrelated
-domains. The collection's superior performance for EnronEmpX would
-suggest to go one step further, and use an individual's own email as
-the bigram source. 
 
-However, an application that requires access to a user's content is
-more cumbersome, and less secure to use than a more general facility.
-Unfortunately, for motion impaired email users this downside is
-exacerbated because their text collections tend to be sparse.
-Their messages are short.
+As suspected, results for ngrams from the personal collection were
+optimal. However, note that all differences between $Personal_{bi}$
+and its successively less effective neighbors were not significant
+until $Speech_{tri}$. Similarly for $Personal_{bi}$ to $Speech_{bi}$
+This outcome is bad news for bigrams, but good news for trigrams. If
+we want to use bigram EchoTrees because, for instance, they are
+quicker for users to scan, then the only optimal solution is the use
+of personal collections. The next option is to use $Speech_{bi}$ which
+lies below $Personal_{bi}$ by about 8 percentage points.
 
-Another option is a learning component, which would over time adjust
-bigram weights to each user. Both, computational linguistics, and
-machine learning algorithms can help.
+For trigram EchoTrees the result is more favorable. Rather than having
+to use personal collections, we could use $Web_{tri}$ or
+$Speech_{tri}$.  Given the drawbacks we described for using personal
+collections, this result argues for the use of trigrams. On the other
+hand, the possible detriments of clutter that go along with trigrams
+pulls towards bigrams. Further end user studies are required to make a
+final decision.
 
-Given the significant number of {\em outOfSeq} hits, we will add
-a {\em word stash} element to our UI design. This element will collect
-any words in an EchoTree that users indicate to be relevant for their
-immediately upcoming communication plan.
+We were surprised by the relative strength of $Web_{tri}$. Note that
+the difference between $Web_{tri}$ and $Web_{bi}$ is significant. We
+did not expect the Web recreation crawl to do well for either variant,
+because the raw results from a crawl are very `messy.' Even after HTML
+tag removal, a large amount of formatting, and styling information is
+left over. Numerous menu headings, and boilerplate materials are
+present as well. We made no effort to clean the corpus further.
 
-The {\em optimal} text source for prediction will likely depend not just on
-a user, but on that user's context when generating words whose
-followers are to be predicted. For this reason the EchoTree
-architecture (Figure~\ref{fig:arch}) anticipates multiple bigram
+Just to ensure that the random draw of $Web_{tri}$ test sentences did
+not produce an unusual outcome, we repeated $Web_{tri}$ with a
+different set of random 60 sentences from the respective
+set-aside. The result was comparible to Figure~\ref{fig:savings}.
+
+The prediction reliability (Figure~\ref{fig:reliability}) shows that
+the order of the six condition by decreasing performance is as per the
+savings measure. A fundamental difference between the two measures,
+however, is that reliability does not depend on individual word
+lengths. 
+
+The best performer in reliability was $Personal_{bi}$ with just under
+.25 on the scale from 0 to 1. Again, for bigram trees no choice is
+better than $Personal_{bi}$. The next bigram choice is $Speech_{bi}$,
+which is a significantly worse performer for prediction. For trigrams,
+however, the equivalent choice of $Web_{tri}$ is available.
+
+In summary, the optimal choice for ngram data source is always the
+personal collection. This result holds for both bigram and trigram
+trees. 
+
+For bigrams, the next best choice is to use the Fisher
+conversation transcripts, albeit at large cost in typing savings and
+prediction reliability.
+
+If trigrams are acceptable to end users, then the recreation Web crawl
+is an acceptable choice for both savings and reliability.
+
+\section{Future Work}
+
+Clearly, end user experiments are required to resolve two
+questions. First, are bigrams or trigrams preferable for the purpose
+of supporting conversations with the disabled typist? Second, do
+conversation partners generate correct guesses themselves that are
+different from the literal content of the EchoTree they scan, but
+still capture the typist's intention? 
+
+If associative guesses do occur, then the overall system---machine
+plus human(s)---will exceed the performance measures of our
+experiment. Our results show the lower bound.The result for the ngram
+arity will impact the range of available data source choices.
+
+A number of follow-on experiments will help illuminate the EchoTree
+design space further. For example, note a difference between the
+recreation Web crawl and the Fisher conversations source. The former
+is biased towards recreation, while the conversations range over 40
+topic areas. The Fisher test sentences were drawn from all those
+topics. The relatively high performance of $Web_{tri}$ suggests that
+multiple sources should be used for EchoTrees, and the proper one
+chosen based on the topic of the typing activity. This approach would
+be more complex, but feasible. For this reason the EchoTree
+architecture (Figure~\ref{fig:arch}) anticipates multiple ngram
 sources that can be switched dynamically.
 
+Another option is a learning component, which would over time adjust
+ngram weights to each user. Both, computational linguistics, and
+machine learning algorithms can help in this regard. This approach
+would be a hybrid between personal and stock data sources.
+
+A number of optimizations are also in our plan. For example, word
+stemming is a likely improvement on prediction reliability. Related
+techniques are well known \cite{PorterStemmerAlgorithm}. We also plan
+to broadcast each character that the typist enters, rather than just
+the entire word once it is completed. This letter by letter
+dissemination will allow conversation partners to provide not just
+follower word prediction, but also word completion.
+
 \section{Related Work}
-EchoTree draws on prior work in reducing text input demands for
-impaired users through the use of language modeling and prediction
-techniques. Existing systems such as Humsher~\cite{Polacek2011}, for
-example, have adapted letter-based text entry systems designed for
-able-bodied users to significantly accelerate text entry for users
-with severe motor impairments.
 
-Trnka, et al. motivate the use of word-based prediction, finding that
-the increased typing rates offered by {\em n-gram}-based word
-prediction can offset the additional cognitive load they may
-introduce~\cite{Trnka2009}. Roark, et al. identified how human
-guessing and n-gram prediction models can complement each other in
-important and useful ways~\cite{Roark2011}. By incorporating the
-conversation partner and word-prediction model into a single
-conversational loop, EchoTree builds on and extends these insights
-from prior work.
+EchoTree serves as an example of {\em Augmentative and Alternatie
+  Communication} (AAC), defined broadly as 'attempts to study and when
+necessary compensate for temporary or permanent impairments, activity
+limitations, and participation restrictions of individuals with severe
+disorders of speech-language production and/or comprehension including
+spoken and written modes of communication.'~\cite{asha2005}. Over the
+past few decades, AAC technologies have closely tracked developments
+in communication technologies and adapted them to improve the rate,
+fluidity, and efficacy of communication for users with physical or
+speech impairments~\cite{vanderheiden2002}. 
 
-EchoTree's design draws heavily on the visual 'keyword-in-context'
-technique embodied in the Word Tree by Wattenberg and
-Viegas~\cite{wattenberg2008}. EchoTree adapts this technique from its
-original purpose of analyzing text corpora to the new problem of
-collaborative text generation. The use of visual metaphors, direct
-interaction, and output-as-input techniques allow for tight coupling
-between the conversation participants and the information
-display~\cite{Ahlberg1994}. The sentence box and confirmation loop
-further afford the process of {\em grounding}, enabling tighter
+
+Advances in language modeling and prediction have been fruitful for
+AAC researchers; anticipating imminent letters, words, or even
+sentences can vastly reduce text input demands of impaired
+users. Systems such as Humsher~\cite{Polacek2011}, for example, have
+adapted letter-based text-entry systems developed for able-bodied
+users to significantly accelerate text entry for severely
+motor-impaired users. While navigating systems such as EchoTree which
+rely on n-gram based prediction can impose additional cognitive
+overhead, prior work has found that this cost is outweighted by the
+benefit of increased typing speed~\cite{Trnka2009}. 
+
+
+EchoTree builds not only on prior research in n-gram word prediction,
+but also on prior work in technology-assisted co-construction of
+sentences. Prior efforts have shown how involving an able-bodied
+communication partner in the conversation loop to make guesses about
+the intended messages can complement the benefits offered by n-gram
+language models~\cite{Roark2011}. 
+
+
+Similarly, the visual design of Echotree adapts the interactive
+"keyword-in-context" visualization technique embodied in the Word
+tree~\cite{Wattenberg2008} from its original purpose of retrospective
+corpus studies to the new problem of collaborative text
+generation. The use of visual metaphors, direct interaction, and
+output-as-input techniques allow for tight coupling between
+conversation participants and with the information
+display~\cite{Ahlberg1994}. EchoTree's sentence box and confirmation
+loop further afford the process of grounding, enabling tighter
 coupling between the conversation partners themselves as they
-negotiate the evolving sentence together.
+negotiate the evolving sentence together.~\cite{clark1991}. 
 
-\section{Future Work and Conclusion}
+\section{Conclusion}
 
 We introduced distributed EchoTrees, which are designed to engage
 conversation partners who interact with motion and speech disabled
@@ -674,26 +861,9 @@ provided an empirical analysis of which data sources are best to use
 for constructing language models to use in this interactive
 conversation scenario.
 
-EchoTree leaves room for many user experience improvements,
-optimizations, and effectiveness measurements. The next step is to
-test the system with users. This experiment will test whether
-conversation partners can use EchoTrees to guess a typist's intent by
-{\em associations} with words in the EchoTree, rather than precise
-matches. The experiment in this paper only measured precise
-predictions, ignoring associations on which human beings might be able
-to rely.
-
-Final word is also out on the question whether users will prefer
-bigrams or trigrams in their EchoTree experience. We listed the pros
-and cons for both choices.
-
-A number of optimizations are also in our plan. For example, word
-stemming is a likely improvement on prediction reliability. Related
-techniques are well known \cite{***porter stemming****}. We also plan
-to broadcast each character that the typist enters, rather than just
-eh entire word once it is completed. This letter by letter
-dissemination will allow conversation partners to provide not just
-follower word prediction, but also word completion.
+Final word is out on the question whether users will prefer bigrams or
+trigrams in their EchoTree experience. We listed the pros and cons for
+both choices, and their impact on the system level decisions.
 
 The problem of social isolation for communication impaired individuals
 is tough to solve for the general case. But special, computer
@@ -706,6 +876,7 @@ conversational moves.
 %   - user studies for guessing
 %   - broadcast each letter as Henry types
 %   - hybrid data sources: general with personal information injected
+%   - get reliability higher
 
 %% \section{Acknowledgments}
 %% Thank you to Henry (anonymized for submission) for patient testing,
