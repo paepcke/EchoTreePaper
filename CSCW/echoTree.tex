@@ -1,7 +1,7 @@
 \documentclass{sigchi}
 
 % Remove or comment out these two lines for final version
-\toappearbox{\Large Submitted to CSCW'13. \\Do not cite, do not circulate.}
+\toappearbox{\Large Submitted to CSCW'14. \\Do not cite, do not circulate.}
 \pagenumbering{arabic}% Arabic page numbers for submission. 
 
 % Use \toappear{...} to override the default ACM copyright statement (e.g. for preprints).
@@ -186,8 +186,8 @@ dismiss. Correct guesses accelerate conversational progress. EchoTrees
 are browser based and interactive. Multiple parties may view, and
 interact with the same stream of EchoTrees from desktops, tablets, or
 smartphones. We describe our implementation, and results of an
-experiment we undertook to identify optimal types of data sources for
-ngram extraction.
+experiment we undertook to identify optimal types of data sources to
+use for generating the underlying data model.
 
   \end{abstract}
 
@@ -229,9 +229,9 @@ his response sentence.
 
 One improvement would be to install a second display on the backside
 of Henry's laptop. Inexpensive, USB based options are available. This
-option would at least allow a listener to understand that information
-is forthcoming. The option does not help as much as possible in
-keeping the listener(s) actively involved in the conversation. 
+option would at least allow listener(s) to understand that information
+is forthcoming. But this solution still keeps the listener(s) passive,
+and likely to be bored.
 
 In an attempt to ameliorate the situation further we developed
 EchoTree. EchoTree is a distributed, collaborative word
@@ -242,61 +242,91 @@ tree. Figure~\ref{fig:echoTree} shows an example.
    \caption{Screenshot of an EchoTree.}
    \label{fig:echoTree}
 \end{figure}
-Henry, of course, stands for many individuals with similar
-impairments. 
+As the disabled typist generates written words on their device, such
+as a laptop, an underlying language model generates word tree
+visualizations that show multiple conversation threads that are
+`likely' to follow each typed word. The tree changes with each
+completed word. Both the typist and co-present, or telephone
+listener(s) have access to these trees via any Web browsing
+devices. Everyone can interact with the trees, exploring them on their
+device.
+
+Listeners can speak up and suggest possible sentence completions to
+the typist, possibly saving the typist time, and speeding the
+conversation. Attempts at predicting content is thus crowd sourced at
+a small scale. While such attempts to complete sentences for a
+conversation partner can be annoying for individuals with fully
+functional communication means, for Henry, the procedure is
+appreciated, and his family routinely engages in it.
+
+In this writing we present the EchoTree system for the first time. It
+will become clear in the following sections that many aspects of the
+design still need to be tested, and the design space must be
+explored. A user study will, for example, be required. Before such a
+study, however, a number of system questions must be resolved, so that
+subsequent user level explorations operate under optimal conditions.
+
+After describing the current user experience and implementation in
+more detail, we present an experimental EchoTree system level
+study. The experiment explores which type of data source to use for
+generating the underlying language model. For questions about prior
+art, please see our Related Work Section near the end.
+
 \section{User Experience}
-A word tree is read from left to right, beginning with a single word,
-the {\em root}. Branching out from the root are words that might
-follow the root in an underlying document collection. EchoTree
-provides five out branches, which are sorted top to bottom by their
-likelihood of being the follower word to the root. Each follower word
-candidate itself features five possible followers to the candidate.
-The tree thereby presents a number of possible conversation threads
-that might begin with the root word.
+A word tree\cite{Wattenberg2008} is read from left to right, beginning
+with a single word, the {\em root}. Branching out from the root are
+words that might follow the root in an underlying document
+collection. EchoTree provides five out-branches, which are sorted top
+to bottom by their likelihood of being the follower word to the
+root. Each follower word candidate itself features five possible
+followers to the candidate.  The tree thereby presents a number of
+possible conversation threads that might begin with the root word.
 
 The underlying collection, of course, impacts the follower
-relationship probabilities. We analyze three collections in the
-experiment section.
+relationship probabilities. We analyze three types of collections in
+the experiment section.
 
 EchoTrees are browser applications that can be viewed anywhere, by
-multiple users. In particular, every word that Henry enters on his
+multiple users. In particular, every word a typist enters on their
 laptop induces an EchoTree, which is made available by an EchoTree
-server as an interactive Web application. Henry can see the trees as
-well. If the word that Henry has in mind to type next is contained in
-the tree, Henry can click on the word. The word is transferred to the
-{\em sentence box} near the display bottom, which collects his
-evolving sentence, and he saves on typing. Once he finishes his next
-word, the previous EchoTree is replaced with a new one, rooted at the
-latest word. Figure~\ref{fig:todayTree} shows highlighted three words
-that were transferred to an input box by clicking on them, one after
-the other.
+server as an interactive Web application. The typist can see the trees
+as well. If the word that the typist has in mind to type next is
+contained in the tree, they can click on the word. The word is
+transferred to the {\em sentence box} near the display bottom, which
+collects the evolving sentence, and saving on cumbersome text
+input. Once the typist finishes the next word, the previous EchoTree
+is replaced with a new one, rooted at the latest
+word. Figure~\ref{fig:todayTree} shows highlighted three words that
+were transferred to an input box by clicking on them, one after the
+other.
 \begin{figure}
    \centering
    \includegraphics[width=0.6\columnwidth]{Figs/echoTreeRootToday.png}
-   \caption{EchoTree re-rooted in `today'. Blue words were user
-     selected, adding them to the sentence box.}
+   \caption{EchoTree re-rooted in `today'. A click selected the blue words
+     adding them to the sentence box.}
    \label{fig:todayTree}
 \end{figure}
-Beyond providing a word source for Henry to choose from, this
-arrangement also enables a number of scenarios where Henry
-communicates with conversation partners who have access to his
+Beyond providing a word source for a disabled typist to choose from,
+this arrangement also enables a number of scenarios where the typist
+communicates with conversation partners who have access to the
 trees. The important point about each of these scenarios is that
 conversation partners remain engaged in the conversation.
 
 For example, the secondary display facing a conversation partner in
-the option discussed earlier could always show Henry's current
+the option discussed earlier could always show the typists's current
 EchoTree. Alternatively, a conversation partner's smartphone or tablet
-can {\em tune in} to Henry's EchoTrees. In either case, informed by the
-EchoTree, the partner can guess future words out loud, again saving
-Henry some typing and enlivening the conversation. 
+can {\em tune in} to a typist's EchoTrees. In either case, informed by
+the EchoTree, the partner can guess future words out loud, again
+saving on typing and enlivening the conversation.
 
-Or, the partner can at least spend time exploring EchoTrees on their
-own while Henry works: The server allows multiple participants to
+Or, partners can at least spend time exploring EchoTrees on their own
+while the typist works: The server allows multiple participants to
 generate their own, separate trees, visible only on their own
-displays, while still seeing Henry's occasional trees. Henry's trees
-are pushed to the client browsers when a new tree becomes available,
-because Henry finished a word. The pushed trees replace any tree
-currently displayed on the participant's device.
+displays, while still seeing the typist's trees as they are
+published. The typist's trees are pushed to the client browsers when a
+new tree becomes available, because the typist finished a word. The
+pushed trees replace any tree currently displayed on the participant's
+device.
 
 EchoTree delivery to portable devices is thus subscription
 based. Participants can in fact subscribe to the EchoTrees of one or
@@ -304,65 +334,50 @@ more other participants. The primary scenario for this paper is,
 however, to have conversation participants subscribed just to a
 disabled person.
 
-Henry or a participant may click or tap on one of the circles in the
-tree that currently occupies their display. In response, the tree is
-{\em re-rooted}: the selected word becomes the root of a new tree. All
-follow words are recomputed, and a new tree is displayed on the
-participant's browser, or any other browsers that are subscribed to
-trees by the person who generated the new tree.
+The typist or a participant may click or tap on one of the circles in
+the tree that currently occupies their display. In response, the tree
+is {\em re-rooted}: the selected word becomes the root of a new
+tree. All follow words are recomputed, and a new tree is displayed on
+the participant's browser, or any other browsers that are subscribed
+to trees by the person who generated the new tree.
 
 Alternatively, one may type a new word into the text box at the top,
 and click on the button {\em Get New Tree}. This action again creates
 a new tree, rooted at the new word, and displayed everywhere.
 
 The EchoTree facility can be used for a number of purposes. In the
-context of Henry interacting in a conversation, the facility may be
-used as follows. 
+context of a disabled typist interacting in a conversation, the
+facility is used as follows.
 
 \subsection{Collaborative Conversing}
-As Henry types words, and corresponding EchoTrees in the browsers of
-all tuned in listeners evolve, any word that Henry completes is
-additionally appended to the sentence box of all participants'
-screens. As listeners actively think ahead, guess where Henry might be
-headed, and call out a correct option, Henry can click on the {\em
-  That's Right} button, or nod. After the successful guess Henry can
-continue, skipping one of more words.
+As the typist enters words, and corresponding EchoTrees in the
+browsers of all tuned in listeners evolve, any word that the typist
+completes is additionally appended to the sentence box of all
+participants' screens. As listeners actively think ahead, guess where
+the typist might be headed, and call out a correct option, the typist
+can click on the {\em That's Right} button, or nod. After the
+successful guess the typist continues, skipping one of more words.
 
-Sometimes participants or Henry may wish to enrich sentences with fill
-words. The pull-down menu below the {\em New word} field satisfies
-that need (Figure~\ref{fig:shortcuts}). Selecting any of these words
-will enter them in the sentence box. Again, in the current
-implementation this addition appears in all subscribing views of the
+Sometimes participants or the typist may wish to enrich sentences with
+fill words. The pull-down menu below the {\em New word} field
+satisfies that need (Figure~\ref{fig:shortcuts}). Selecting any of
+these words will enter them in the sentence box. Again, in the current
+implementation this addition appears in all subscribing views of the.
 \begin{figure}
    \centering
-   \includegraphics[width=0.4\columnwidth]{Figs/echoTreePulldownSnapshotSmall.png}
+   \includegraphics[width=\columnwidth]{Figs/echoTreePulldownSnapshotSmall.png}
    \caption{Shortcut words are available as fillers for the sentence box.}
    \label{fig:shortcuts}
 \end{figure}
 Note that the use of EchoTrees for collaborative conversation is not
-limited to face-to-face situations, like parties. Communication
-with Henry via the telephone are also an option. The remote
-participant tunes into Henry's EchoTrees, and offers guesses over the
-phone. Since Henry nodding assent is not an option in this scenario,
-the {\em Not That} button can serve as a negative response.
+limited to face-to-face situations. Communication with the disabled
+person via the telephone are also an option. The remote participant
+tunes into the typist's EchoTrees, and offers guesses over the
+phone. Since the typist nodding assent is not an option in this
+scenario, the {\em Not That} button can serve as a negative response.
 
 \subsection{Architecture}
 
-%***** Cover Good-Turing
-%***** Cover ngrams:
-For example:
-
-\hspace{1 cm}1.294000e-05,circumstances,like
-\hspace{1 cm}1.294000e-05,He,just
-\hspace{1 cm}1.050000e-04,while,I
-\hspace{1 cm}1.294000e-05,caused,when
-\hspace{1 cm}1.294000e-05,not,He
-
-
-Each entry in these lists contains a probability. The first line
-above means `there is a 1.294000e-05 probability that the word {\em
-  like} follows in a sentence, if the current sentence word is {\em
-  circumstances}. 
 Figure~\ref{fig:arch} shows how the EchoTree system is
 constructed. 
 \begin{figure}
@@ -372,83 +387,117 @@ constructed.
      WebSocket ports. Browsers tune in to different EchoTree channels.}
    \label{fig:arch}
 \end{figure}
-Central, or distributed EchoTree servers each manage some
-number of distinct EchoTree channels. All facilities described above
-operated on one channel. All shared EchoTree views are refreshed, and
-request re-rooting on one channel. The server computes the trees,
-given a root word.
+Central, or distributed EchoTree servers each manage some number of
+distinct EchoTree channels. All facilities described above operate on
+one channel. That is all shared EchoTree views are refreshed on that
+channel, and requests for re-rooting occur on that channel. The server
+computes trees, given a root word. Once computed, the new tree is
+pushed to all subscribers.
 
 Multiple, unrelated EchoTree sequences may be served by a single
-server, using different ports. In Figure~\ref{fig:arch}
-Brower~3 is separated from Browsers one and two, which share all
-EchoTree transmissions.
+server, using different ports. In Figure~\ref{fig:arch} Browser three
+is separated from Browsers one and two, which share mutual EchoTree
+transmissions.
 
 Browsers communicate with EchoTree servers via WebSocket connections,
 which are bi-directional. This bidirectionality enables the re-rooting
 requests from browsers back to the server.
 
-Figure~\ref{fig:arch} also shows an HTTP port family. These ports can
-push new words to the echo server, triggering the multicast of a new
-EchoTree to all browsers on the respective channel. These HTTP
-connections are simpler than the more versatile WebSocket
-connections. They are provided for easy connection with word entry
-support applications on Henry's machine. For example, Henry uses an
-application that offers word completions as he types a word. The HTTP
-method of pushing words to the EchoTree server can be attached to this
-application. This method allows Henry to focus on typing in his usual
-environment, and not being forced to interact with a browser's {\em
-  New Word} entry to push a new word (and consequently a new
-EchoTree).
+Figure~\ref{fig:arch} also shows an HTTP port family. These ports are
+used to push new root words to the echo server from sources other than
+browsers. Non-standard, desktop based text input applications for
+disabled typists do not feature Web socket capabilities. The ports can
+be used instead via standard socket operations. The server listening
+on those ports interacts with the applications (or bridges to the
+applications) via the same protocol as the browsers use over Web
+sockets.  
 
-Figure~\ref{fig:arch} shows a series of databases with word pair
-frequencies that are the basis for the generation of the trees. The
-word pairs are word collocation statistics, or {\em bigrams}.  Each
-database holds lists of triples: a word, a follower word, and a
-frequency count. These bigram counts may originate from any text
-collection. Given a root word, EchoTree, like other word tree
-visualizations, recursively finds follow-on words, which are chosen by
-maximum frequency.
+Like new trees created in response to re-rooting requests from
+browsers, the trees created in response to applications' requests
+trigger the multicast of a new EchoTree to all browsers on the
+respective channel. This method allows typists to focus on operating
+in their usual environment, not being forced to interact with a
+browser's {\em New Word} entry to push new root words.
 
-The trees of the above figures are based on bigrams from the Enron
-collection ~\cite{enron}. In the following section we examine some
-aspects of this underlying collection, which strongly influence the
-induced EchoTrees.
+At its bottom, Figure~\ref{fig:arch} shows a series of databases with
+word follower frequencies that are the basis for the generation of the
+trees. The resources in these databases consist of {\em ngrams} with
+associated occurrence probabilities. That is, each database holds one
+or more lists of entries consisting of a probability $p$, and two or
+more words, $w_0$, $w_1$, $w_2\cdots$
+
+For example, one snippet of such a list might look like this:
+
+\begin{verbatim}
+     1.294000e-05,circumstances,like
+     1.294000e-05,He,just
+     1.050000e-04,while,I
+     1.294000e-05,caused,when
+     1.294000e-05,not,He
+\end{verbatim}
+
+The probability informs the EchoTree construction how likely it is
+that the sequence $w_1$, $w_2\cdots$ follows $w_0$. The probabilities
+originate from any text collection. But as we will show, the
+collections, and the choice of ngram arity have important impacts on
+the generated trees. The EchoTree of Figure~\ref{fig:todayTree}, for
+example, is based on bigrams from the Enron email collection
+~\cite{enron}.
+
+Given a new root word, the EchoTree constructor queries one of the
+underlying databases for the top five list entries whose $w_0$ is the
+root word. The choice of which list is consulted is determined by the
+channel through which the re-root request was delivered, that is on
+the originating subscription.
+
+Each probability/ngram list is constructed once from one textual
+source, using the Good-Turing
+procedure~\cite{Gale95good-turingsmoothing}. This treatment smoothes the
+otherwise spikey ngram distribution, and sets aside some probability
+mass for ngrams not encountered in the underlying collection.
+
+Cornerstones of EchoTree's system level design are the choices of
+underlying data sources. But other system level desicions impact the
+user experience as well. While we address the data source decision in
+this paper, the following section points to some of these additional
+considerations.
 
 \section{Design Considerations}
 
-The cornerstones of EchoTree's design are the choices of underlying
-data source, and the language model. But other desicions impact the
-user experience as well. In this paper we address the data source
-decision. The final word on other design choices is not out yet. But
-we next describe the associated considerations.
+We now illustrate how the language model that generates EchoTrees
+plays into the user experience. As one more example for the details
+that must be considered, we then look at the issue of stopword
+removal, to be followed by a section on data source issues that
+takes us to the associated experiment.
 
 \subsection{Language Model}
 The EchoTree word predictions are based on a model of the English
 language. Working with ngrams has served us well. Both bigrams and
 trigrams are common choices in Natural Language Processing. Both
 options produce plausible word trees, but the display is by necessity
-more cluttered when trigrams are shown. Figure~\ref{biTrigrams} shows
-a comparison between the two options, using the same root word.
+more cluttered when trigrams are shown. Figure~\ref{fig:biTrigrams}
+shows a comparison between the two options, using the same root word,
+{\em night.}
 \begin{figure}
    \centering
    \includegraphics[width=\columnwidth]{Figs/biAndTrigrams.png}
    \caption{Comparing bigram and trigram tree displays.}
    \label{fig:biTrigrams}
 \end{figure}
-The trigram tree is more expressive, than the bigram tree, but it is
-visually denser. Finding words in the trigram display, to then transfer
-them to the sentence box is more time consuming than scanning the bigram
-version. Depending on word length, the distraction time away from the
+The trigram tree is more expressive than the bigram tree, but it is
+visually denser. To a disabled typist, finding a word in the trigram
+display with the intention of then transfering it to the sentence box
+is more time consuming than scanning the bigram version. Depending on
+the length of the sought word, the distraction time away from the
 onscreen keyboard may outweigh the savings in typing.
 
 The distraction time not only comprises the time it takes to visually
-scan the tree, and to move the cursor to a found word via the head
-tracker. But the onscreen keyboard must then be re-acquired for
-further typing. The tradeoff between typing and retrieving words from the
-EchoTree is related to word length: the longer the retrieved word, the
-more likely it is that leaving the keyboard is worthwhile.
+scan the tree, and to move the cursor to a found word via, for
+example, a head tracker. But the onscreen keyboard must then be
+re-acquired for further typing. 
 
-Word length, in turn, is related to another design choice, the
+Word length, which determines how profitable a cursor excursion to an
+EchoTree might be, in turn is related to another design choice, the
 retention or elimination of stop words.
 
 \subsection{Stopwords}
@@ -458,34 +507,33 @@ frequently occurring words are often disregarded in user queries, and
 in underlying index structures. These {\em stopwords} include words
 like `the', `that', and `a'. Is stopword elimination appropriate for
 our purpose of collaborative conversation? We experimented with both
-options, and included examples for both in the the
+options, and included examples for both in the
 figures. Figure~\ref{fig:echoTree} was created while retaining
 stopwords, while Figure~\ref{fig:todayTree} was constructed with
-stopwords removed. 
+stopwords removed.
 
 Clearly, stopword removal tends to display more interesting
 words. However, the more complete sentence structure borne from
 stopword retention makes it easier for conversation partners to call
-out the next word choice, thus saving the disabled typist time. Note
-that this time saving is enjoyed in full, because the typist's
-attention can continue to dwell on the onscreen keyboard. Short of a
-formal study, we have anecdotal evidence from Henry, who prefers to
-lay down all words, not leaving out stopwords in spite of the
-increased communication expense. A final decision on the stopword
-question awaits a study.
+out the next word choice, thus saving the disabled typist time, albeit
+often for short words. Note that this time saving is enjoyed in full,
+because the typist's attention can continue to dwell on the onscreen
+keyboard. Short of a formal study, we have anecdotal evidence from
+Henry, who prefers to lay down all words, not leaving out stopwords in
+spite of the increased communication expense. A final decision on the
+stopword question awaits a study.
 
 \subsection{Data Source}
 
 As described, the probability of any word following another is derived
 from word occurrence statistics in an underlying data source. Which
-source to use? Intuitively, we suspect might suspect that using a
-person's own written materials for the ngram statistics will be
-particularly effective in predicting that person's writing. 
+source to use? Intuitively, we might suspect that using a person's own
+written materials for the ngram statistics will be particularly
+effective in predicting that person's writing.
 
-One problem with this approach is twofold. For one, a disabled
-person's email messages, for example, will tend to be concise. This
-brevity in turn limits the amount of material over which ngrams can be
-computed. 
+Three problems arise from this approach. For one, a disabled person's
+email messages, for example, will tend to be concise. This brevity in
+turn limits the amount of material over which ngrams can be computed.
 
 A second problem with using personal writing, like email, is that
 obtaining the email collection is more difficult now that the material
@@ -500,18 +548,18 @@ follows another in one's entire personal corpus should not necessarily
 be open to public view.
 
 At the other extreme, we can use a broad source, like Google's
-terabyte ngram collection \cite{google1T}. Its coverage across millions of
-Web pages is more or less topic neutral, and thereby maybe universally
-applicable. Between these extremes lies the option of utilizing
-multiple ngram sets, each from one topic specific collection of Web
-pages. Users would choose a configuration that is appropriately close
-to their topic of conversation. Maybe the topic specificity would be
-beneficial. 
+terabyte ngram collection \cite{google1T}. Its coverage across
+millions of Web pages is more or less topic neutral, and thereby maybe
+universally applicable. Between these extremes lies the option of
+utilizing multiple ngram sets, each from one topic specific collection
+of Web pages. When requesting re-rooting, users would choose a
+configuration that is appropriately close to their topic of
+conversation. Maybe the topic specificity would be beneficial.
 
 Or, one might argue that neither email, nor Web content, nor ngrams
 from scanned books \cite{anc} are optimal for a conversational
 context. What if our word choices in conversations is very different
-from those of our Web pages?
+from those of our Web pages or email messages?
 
 We conducted an experiment that examined the EchoTree performance of
 three datasources, each tested under both bigram and trigram design
@@ -519,21 +567,25 @@ variants.
 
 \section{Data Source Performance Experiment}
 
-Our performance measure comprises two components. Both components were
-computed automatically.
+Our experiment tested six experimental conditions (independent
+variables). These conditions arise from tests of three ngram data
+sources, each producing either bigram, or trigram trees. Our
+performance measure, the dependent variables comprises two
+components. Both components were computed automatically.
 
 \subsection{Performance Measures}
 
-We measured both performance components for all six experimental
-conditions: three datasources times bigram vs. trigram. The first
-performance component is the prediction {\em reliability} with which
-EchoTrees predict follow-on words for each successive word in test
-sentences. The sentences were taken from collection set-asides over
-which no ngrams were collected (see below).
+The first performance component we computed for each experimental
+condition is the {\em reliability} with which EchoTrees predict
+follow-on words for each successive word in test sentences. The test
+sentences for each condition were taken from collection set-asides of
+the condition's data source. No ngrams were collected from those
+set-asides. 
 
-Our automated evaluation pulled one word $W$ after another from each
-testing sentence $S$, and constructed an EchoTree with $W$ as its
-root. If $W$'s follower appeared in the tree at the tree's first
+In measuring the reliability of an experimental condition, our
+automated evaluation pulled one word $w$ after another from each
+testing sentence $S$, and constructed an EchoTree with $w$ as its
+root. If $w$'s follower appeared in the tree at the tree's first
 level, the sentence was assigned one point. If the follower appeared
 at the second tree level, one half point was awarded to the
 sentence. The reliability measure for $S$ was computed as the sum of
@@ -562,15 +614,16 @@ need to be typed in a real life situation, because the respective
 words were available in EchoTrees. We counted spaces between words in
 the grand sum of letters to be typed. We also counted the click needed to
 cause words in the EchoTree to replicate down into the sentence box as
-a cost equivalent to typing one character. This method is an
-approximation, because of the above mentioned issue of distraction.
+a cost equivalent to typing one character. We did not consider the
+time required for acquiring a word in the tree, and then re-acquiring
+the onscreen keyboard.
 
 \subsection{Tested Data Sources}
 
-The first data source, {\em REC} consists of 10M Web pages we
-retrieved from the {\em Recreation} section of the Open Directory
-Project (ODP) \cite{dmoz}. The project used human input to categorized
-Web pages. We eliminated all pages that stemmed from the ODP site
+Our first data source, consists of 10M Web pages we retrieved from the
+{\em Recreation} section of the Open Directory Project (ODP)
+\cite{dmoz}. The project uses human input to categorized Web pages. We
+eliminated from the crawl all pages that stemmed from the ODP site
 itself, retaining pages from the Recreation target sites one level
 deep. We removed all HTML and Javascript from the resulting pages,
 then tokenized the remainder using the Stanford NLP Tokenizer
@@ -578,37 +631,36 @@ then tokenized the remainder using the Stanford NLP Tokenizer
 trigrams.
 
 Our second data source is the Fisher collection's transcripts of
-11,000 ten-minute telephone conversations {\em FISH}. Each
+11,000 ten-minute telephone conversations~\cite{fisher1,fisher2}. Each
 conversation centers around one topic that was assigned to the paid
 conversation dyad participants. We cleaned the collection of embedded
 metadata, like the timestamp and source of each speech turn. The
-remainder was again tokenized, and we extracted 149,789 bigrams and
-93,534 trigrams.
+remainder was tokenized and we extracted 149,789 bigrams and 93,534
+trigrams.
 
-Our third experiment data source, finally is a blog Henry maintains
-{\em BLOG}. The snapshot was taken on May 10, 2013, and comprises
-1,167 sentences (96.5MB), 12,222 bigrams, and 16,567 trigrams.
+Our third experiment data source, finally is a blog our collaborator
+maintains~\cite{henryBlog}. The snapshot was taken on May 10, 2013,
+and comprises 1,167 sentences (96.5MB), generating 12,222 bigrams, and
+16,567 trigrams after a 5\% set-aside.
 
 \subsection{Test Procedure}
 
-For the recreation Web source (REC), we removed HTML markup before
+For the ODP Recreation Web source, we removed HTML markup before
 further processing. Before extracting ngrams, from data source
 content, we set aside a portion of the corpus as a source for test
-sentences. We used a 10\% set-aside for REC and FISH, and 5\% for
-BLOG.
+sentences. We used a 10\% set-aside for the Recreation source and the
+Fisher conversations, and 5\% for the blog source.
 
-%****** Refer back to architecture section:
-We computed ngram probabilities using the Good-Turing algorithm
-\cite{Gale95good-turingsmoothing}. This treatment smoothes the
-otherwise spikey ngram distribution, and sets aside some probability
-mass for ngrams not encountered in the underlying collection.
+As explained earlier, we computed ngram probabilities using the
+Good-Turing algorithm \cite{Gale95good-turingsmoothing}.
 
 The end result were six lists. Each of the three data sources induced
 one list of bigrams, and another list of trigrams. 
 
 We randomly selected 60 sentences from each of the corpus set-asides.
-We explain the further procedure using one of the six experimental
-conditions: bigrams from the Fisher collection of conversations.
+For calrity we explain the further procedure using one of the six
+experimental conditions: bigrams from the Fisher collection of
+conversations.
 
 The test software tokenized each of the 60 sentences that were set
 aside from the Fisher collection before generating its bigrams. Using
@@ -616,23 +668,25 @@ the Fisher bigram list, word trees were computed repeatedly as
 described in the Performance Measures section. The trees were not
 displayed; only their internal representations were used for the
 computations. This procedure produced a {\em csv} file with one line
-for each sentence recording the two performance scores: The savings in
-typing and the reliability in predicting follow-on words.
+for each sentence, recording the two performance scores: The savings
+in typing and the reliability in predicting follow-on words.
 
 \section{Results}
 
 We used a oneway ANOVA to evaluate the differences among mean typing
-savings (first outcome variable), and among reliability measure means
-(second outcome variable) for the six experimental conditions, i.e.
-the six combinations of three data sources and two ngram arities.
+savings (first dependent variable), and among reliability measure
+means (second dependent variable) for the six experimental conditions,
+i.e.  the six combinations of three data sources and two ngram
+arities.
 
 Levene's test found variances among the six groups to be different.
 We nevertheless opted for the ANOVA procedure, because our sample
-sizes were all equal with 60 sentences.
+sizes were all equal at 60 sentences.
 
-We found a significant effect of the data source on savings in typing,
-$F(5,354)=16.0$, $p<.001$. The effect of data source on prediction
-reliability was also significant, $F(5,354)=25.4$, $p<.001$.
+We found a highly significant effect of the data source on savings in
+typing, $F(5,354)=16.0$, $p<.001$. The effect of data source on
+prediction reliability was also highly significant, $F(5,354)=25.4$,
+$p<.001$.
 
 Tukey HSD post-hoc tests revealed a number of significant between group
 differences. See Table~\ref{tab:savings} and Table~\ref{tab:reliability}.
@@ -717,27 +771,28 @@ lies below $Personal_{bi}$ by about 8 percentage points.
 
 For trigram EchoTrees the result is more favorable. Rather than having
 to use personal collections, we could use $Web_{tri}$ or
-$Speech_{tri}$.  Given the drawbacks we described for using personal
+$Speech_{tri}$.  Given the drawbacks we described of using personal
 collections, this result argues for the use of trigrams. On the other
 hand, the possible detriments of clutter that go along with trigrams
 pulls towards bigrams. Further end user studies are required to make a
 final decision.
 
-We were surprised by the relative strength of $Web_{tri}$. Note that
-the difference between $Web_{tri}$ and $Web_{bi}$ is significant. We
-did not expect the Web recreation crawl to do well for either variant,
+We were surprised by the relative strength of $Web_{tri}$. (Note that
+the difference between $Web_{tri}$ and $Web_{bi}$ is significant.). We
+did not expect the Web Recreation crawl to do well for either variant,
 because the raw results from a crawl are very `messy.' Even after HTML
 tag removal, a large amount of formatting, and styling information is
 left over. Numerous menu headings, and boilerplate materials are
-present as well. We made no effort to clean the corpus further.
+present as well. We made no effort to clean the corpus beyond HTML tag
+removal.
 
 Just to ensure that the random draw of $Web_{tri}$ test sentences did
 not produce an unusual outcome, we repeated $Web_{tri}$ with a
 different set of random 60 sentences from the respective
-set-aside. The result was comparible to Figure~\ref{fig:savings}.
+set-aside. The result was comparable to Figure~\ref{fig:savings}.
 
 The prediction reliability (Figure~\ref{fig:reliability}) shows that
-the order of the six condition by decreasing performance is as per the
+the order of the six conditions by decreasing performance is as per the
 savings measure. A fundamental difference between the two measures,
 however, is that reliability does not depend on individual word
 lengths. 
@@ -761,17 +816,17 @@ is an acceptable choice for both savings and reliability.
 
 \section{Future Work}
 
-Clearly, end user experiments are required to resolve two
-questions. First, are bigrams or trigrams preferable for the purpose
-of supporting conversations with the disabled typist? Second, do
-conversation partners generate correct guesses themselves that are
+Clearly, end user experiments are required to resolve at least two
+questions. First, are bigrams, or trigrams the preferable tree form
+for the purpose of supporting conversations with the disabled typist?
+Second, do conversation partners generate correct guesses that are
 different from the literal content of the EchoTree they scan, but
-still capture the typist's intention? 
+still capture the typist's intention?
 
-If associative guesses do occur, then the overall system---machine
-plus human(s)---will exceed the performance measures of our
-experiment. Our results show the lower bound.The result for the ngram
-arity will impact the range of available data source choices.
+If such associative guesses do occur, then the overall
+system---machine plus human(s)---will exceed the performance measures
+of our experiment. Our results show a lower bound.The result for the
+ngram arity will impact the range of available data source choices.
 
 A number of follow-on experiments will help illuminate the EchoTree
 design space further. For example, note a difference between the
@@ -801,7 +856,7 @@ follower word prediction, but also word completion.
 \section{Related Work}
 
 EchoTree serves as an example of {\em Augmentative and Alternatie
-  Communication} (AAC), defined broadly as 'attempts to study and when
+  Communication} (AAC), defined broadly as `attempts to study and when
 necessary compensate for temporary or permanent impairments, activity
 limitations, and participation restrictions of individuals with severe
 disorders of speech-language production and/or comprehension including
@@ -828,33 +883,35 @@ EchoTree builds not only on prior research in n-gram word prediction,
 but also on prior work in technology-assisted co-construction of
 sentences. Prior efforts have shown how involving an able-bodied
 communication partner in the conversation loop to make guesses about
-the intended messages can complement the benefits offered by n-gram
+the intended messages can complement the benefits offered by ngram
 language models~\cite{Roark2011}. 
 
 
-Similarly, the visual design of Echotree adapts the interactive
+Similarly, the visual design of EchoTree adapts the interactive
 "keyword-in-context" visualization technique embodied in the Word
 tree~\cite{Wattenberg2008} from its original purpose of retrospective
 corpus studies to the new problem of collaborative text
 generation. The use of visual metaphors, direct interaction, and
 output-as-input techniques allow for tight coupling between
-conversation participants and with the information
+conversation participants and the information
 display~\cite{Ahlberg1994}. EchoTree's sentence box and confirmation
 loop further afford the process of grounding, enabling tighter
 coupling between the conversation partners themselves as they
-negotiate the evolving sentence together.~\cite{clark1991}. 
-
-\section{Conclusion}
-
-We introduced distributed EchoTrees, which are designed to engage
-conversation partners who interact with motion and speech disabled
-individuals. The word trees, which are multicast over the Web are
-browser applications that allow the partners to see what the typist
-has written so far. In addition, after each word is typed, a tree of
-possibly following words is recursively constructed and distributed. 
-The disabled person can use the EchoTrees as a source for words that
-then don't need to be typed. The conversation partners can use them to
-guess future words, thus again saving the typist time and effort.
+negotiate the evolving sentence together.~\cite{clark1991}.
+% Without the following linebreak encouragement,
+% we get 'Conclusion' on one page, and the body
+% of the section on the next:
+\linebreak\section{Conclusion}
+We introduced EchoTrees, which are distributed, interactive word
+trees. The facility is designed to engage conversation partners who
+interact with motion and speech disabled individuals. The word trees,
+which are multicast over the Web are browser applications that allow
+the partners to see what the typist has written so far. In addition,
+after each word is typed, a tree of possibly following words is
+recursively constructed and distributed.  The disabled person can use
+the EchoTrees as a source for words that then don't need to be
+typed. The conversation partners can use them to guess future words,
+thus again saving the typist time and effort.
 
 We explained some of the design problems and considerations, and then
 provided an empirical analysis of which data sources are best to use
@@ -863,7 +920,9 @@ conversation scenario.
 
 Final word is out on the question whether users will prefer bigrams or
 trigrams in their EchoTree experience. We listed the pros and cons for
-both choices, and their impact on the system level decisions.
+both choices, and their impact on the system level decisions.  Studies
+of user level behaviors and preferences will need to be conducted as
+well; we listed some of the topics in question.
 
 The problem of social isolation for communication impaired individuals
 is tough to solve for the general case. But special, computer
